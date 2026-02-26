@@ -1,0 +1,50 @@
+server:
+    port: 8081
+
+spring:
+    jpa:
+        hibernate:
+            temp:
+                use_jdbc_metadata_defaults: false
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+    autoconfigure:
+        exclude: org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration,org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+    data:
+        mongodb:
+            uri: ${MONGO_URL}
+            auto-index-creation: true
+    datasource:
+        hikari:
+            maximum-pool-size: 5
+            minimum-idle: 2
+        url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require
+        username: postgres.axxwxwxnqteramwkrwrn
+        password: ${DB_PASSWORD}
+        driver-class-name: org.postgresql.Driver
+    application:
+        name: AiServicesmartSeat
+
+    ai:
+        ollama:
+            base-url: http://localhost:11434
+            chat:
+                options:
+                    # llama3.2 is excellent for MCQs, but you can also use mistral or gemma2
+                    model: ${MODEL}
+                    temperature: 0.7
+                    # This helps local models stick to the JSON format you need
+                    format: json
+            init:
+                timeout: 600s # Increase to 10 minutes
+
+    servlet:
+        multipart:
+            enabled: true
+            max-file-size: 20MB
+            max-request-size: 20MB
+
+# Optional: Enable better logging to see the prompt exchange in your console
+logging:
+    level:
+        org.springframework.ai: DEBUG
+        org.apache.tika: ERROR
