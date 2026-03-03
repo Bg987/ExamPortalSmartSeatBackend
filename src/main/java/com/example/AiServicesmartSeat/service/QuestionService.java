@@ -4,6 +4,7 @@ import com.example.AiServicesmartSeat.DTO.QuestionDTO;
 import com.example.AiServicesmartSeat.entity.QuestionEntity;
 import com.example.AiServicesmartSeat.entity.QuestionData;
 import com.example.AiServicesmartSeat.repository.QuestionRepository;
+import com.example.AiServicesmartSeat.repository.TimetableRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.core.ParameterizedTypeReference;
@@ -19,14 +20,12 @@ import java.util.stream.Collectors;
 public class QuestionService {
 
     private final ChatClient chatClient;
+    private final TimetableRepo timetableRepo;
     private final QuestionRepository questionRepository;
 
     @Async
-    public void generateQuestions(String contextText, int totalQuestions, String examId) {
+    public void generateQuestions(String contextText, int totalQuestions, Long examId) {
         try {
-            if(questionRepository.existsByExamId(examId)){
-                throw new RuntimeException("question already generated for this exam");
-            }
             String limitedContext = truncateContext(contextText, 2000);
 
             String prompt = """
@@ -73,12 +72,12 @@ public class QuestionService {
 
                 // 2. Create ONE single document for the whole exam
                 QuestionEntity examPaper = new QuestionEntity();
-                examPaper.setExamId(examId);
+                examPaper.setExamId(String.valueOf(examId));
                 examPaper.setQuestions(questionList);
 
                 // 3. Save the single document to MongoDB
                 questionRepository.save(examPaper);
-
+                timetableRepo.markAsGenerated(examId);
                 System.out.println("✅ Saved single document for Exam ID: " + examId + " with " + questionList.size() + " questions.");
             } else {
                 System.out.println(">>> AI returned an empty list.");

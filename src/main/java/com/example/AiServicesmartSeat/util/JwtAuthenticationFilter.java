@@ -25,7 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
 
     @Value("${SEB_CONFIG_KEY}")
-    private final String SEB_CONFIG_KEY;
+    private  String SEB_CONFIG_KEY;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -47,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 2. PUBLIC PATH CHECK: Allow login without a JWT token
         String path = request.getServletPath();
-        if (path.contains("/ExamApi/Auth/login") || path.contains("/public")) {
+        if (path.contains("/ExamApi/Auth/login") || path.contains("/public")||path.contains("/api/exam/")) {
             filterChain.doFilter(request, response);
             return; // Stop processing this filter, move to the next
         }

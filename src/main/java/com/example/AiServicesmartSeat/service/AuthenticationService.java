@@ -57,12 +57,18 @@ public class AuthenticationService {
                 res.addCookie(cookie);
                 return helper.buildResponse(HttpStatus.OK, "success", "Identity Verified", true, distance);
             } else {
+                jakarta.servlet.http.Cookie cookie= cookieU.delCookie("AUTH_TOKEN");
+                res.addCookie(cookie);
                 return helper.buildResponse(HttpStatus.UNAUTHORIZED, "fail", "Face mismatch detected", false, distance);
             }
 
         } catch (IOException e) {
+            jakarta.servlet.http.Cookie cookie= cookieU.delCookie("AUTH_TOKEN");
+            res.addCookie(cookie);
             return helper.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "error", "Image processing failed", false, null);
         } catch (Exception e) {
+            jakarta.servlet.http.Cookie cookie= cookieU.delCookie("AUTH_TOKEN");
+            res.addCookie(cookie);
             return helper.buildResponse(HttpStatus.SERVICE_UNAVAILABLE, "error", "AI Service Error: " + e.getMessage(), false, null);
         }
     }

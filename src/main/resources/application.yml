@@ -15,9 +15,12 @@ spring:
             auto-index-creation: true
     datasource:
         hikari:
-            maximum-pool-size: 5
-            minimum-idle: 2
-        url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require
+            maximum-pool-size: 3 # Reduce further if only doing light metadata work
+            minimum-idle: 1
+            idle-timeout: 30000
+            max-lifetime: 1800000
+            connection-timeout: 60000 # Give it 60s to find a spot in the pool
+        url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
         username: postgres.axxwxwxnqteramwkrwrn
         password: ${DB_PASSWORD}
         driver-class-name: org.postgresql.Driver

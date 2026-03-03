@@ -3,7 +3,9 @@ package com.example.AiServicesmartSeat.controller;
 
 import com.example.AiServicesmartSeat.DTO.ApiResponse;
 import com.example.AiServicesmartSeat.service.AuthenticationService;
-import jakarta.persistence.EntityNotFoundException;
+import com.example.AiServicesmartSeat.util.HelperMethod;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,10 +22,14 @@ import java.util.Map;
 public class AuthenticationController {
 
     private final AuthenticationService authService;
+    private final HelperMethod helper;
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> login(@RequestParam("enrollmentNumber") String enrollmentNumber,
-                                             @RequestParam("image") MultipartFile image, HttpServletResponse res) {
+                                             @RequestParam("image") MultipartFile image,
+                                             HttpServletResponse res,
+                                             Authentication authentication) {
+
         try {
             return (ResponseEntity<ApiResponse>) authService.faceAuth(enrollmentNumber, image,res);
         } catch (Exception e) {

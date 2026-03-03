@@ -43,7 +43,7 @@ public class SecurityConfig {
                 // 4. Define Route Permissions
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Add this!
-                        .requestMatchers("/ExamApi/Auth/login").permitAll() // Open to everyone
+                        .requestMatchers("/ExamApi/Auth/login","/api/exam/**").permitAll() // Open to everyone
                         .requestMatchers("/api/ai/questions/**").authenticated()
                         .anyRequest().authenticated() // Everything else needs a valid JWT
                 )
