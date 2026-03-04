@@ -58,29 +58,40 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = null;
         if (request.getCookies() != null) {
             token = Arrays.stream(request.getCookies())
-                    .filter(cookie -> "AUTH_TOKEN".equals(cookie.getName()))
+                    .filter(cookie -> "AUTH_JWT".equals(cookie.getName()))
                     .map(Cookie::getValue)
                     .findFirst()
                     .orElse(null);
         }
 
-        // 4. VALIDATE & AUTHENTICATE
-        if (token != null && jwtUtil.validateToken(token)) {
-            String id = jwtUtil.extractId(token);
-            String role = jwtUtil.extractRole(token);
+        if (token == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-            UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(id, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
-
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authToken);
-
-            filterChain.doFilter(request, response); // Pass to controller
-        } else {
-            // 5. UNAUTHORIZED: No token or expired
+        if (!jwtUtil.validateToken(token)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Unauthorized: Please login  again.\"}");
+            response.getWriter().write(
+                    "{ \"error\": \"Access denied\", \"message\": \"Cookie modified or expired. Login again.\" }"
+            );
+            return;
         }
+
+        String id = jwtUtil.extractId(token);
+        String role = jwtUtil.extractRole(token);
+
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(
+                        id,
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                );
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        // Continue filter chain
+        filterChain.doFilter(request, response);
+
     }
 }

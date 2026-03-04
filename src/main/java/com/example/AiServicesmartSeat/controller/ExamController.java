@@ -26,17 +26,14 @@ public class ExamController {
     private final QuestionService questionService;
     private final TimetableRepo timetableRepo;
     private final Tika tika = new Tika();
-    private final QuestionRepository qrepo;
 
+
+    @PreAuthorize("hasRole('university')")
     @PostMapping("/generate-from-pdf")
     public ResponseEntity<?> generateFromPdf(
             @RequestParam("file") MultipartFile file,
             @RequestParam(defaultValue = "10") int count,
             @RequestParam Long examId) {
-
-
-        System.out.println(examId+" "+count);
-        //return ResponseEntity.ok(Map.of("status", "ok", "message", "questions generation started in background"));
 
         try {
             // Extract text from PDF
@@ -54,21 +51,25 @@ public class ExamController {
 
         }
         catch(BadRequestException e){
+
             return ResponseEntity.badRequest().body(Map.of("status", "error", "message", e.getMessage()));
         }
         catch (Exception e) {
+
             System.out.println("error in question generation = ");
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("status", "error", "message", e.getMessage()));
         }
     }
 
-    @PreAuthorize("hasRole('university')")
+    @PreAuthorize("hasRole('student')")
     @GetMapping("/test")
     public String test(){
         return "protected for studnet";
     }
 
+
+    @PreAuthorize("hasRole('university')")
     @GetMapping("/ExamWithoutQeustions")
     public ResponseEntity<?> ExamWithoutQeustions(){
 

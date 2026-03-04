@@ -49,5 +49,9 @@ spring:
 # Optional: Enable better logging to see the prompt exchange in your console
 logging:
     level:
-        org.springframework.ai: DEBUG
-        org.apache.tika: ERROR
+        org:
+            springframework:
+                ai: DEBUG
+                security: DEBUG
+            apache:
+                tika: ERROR

@@ -56,23 +56,22 @@ public class AuthenticationService {
                 Students student = stuRepo
                         .findByEnrollmentNo(enrNumber)
                         .orElseThrow(() -> new RuntimeException("Student not found"));
-
                 Long studentId = student.getStudentId();
                 jakarta.servlet.http.Cookie cookie = cookieU.setCookie(studentId,"student");
                 res.addCookie(cookie);
                 return helper.buildResponse(HttpStatus.OK, "success", "Identity Verified", true, distance);
             } else {
-                jakarta.servlet.http.Cookie cookie= cookieU.delCookie("AUTH_TOKEN");
+                jakarta.servlet.http.Cookie cookie= cookieU.delCookie("AUTH_JWT");
                 res.addCookie(cookie);
                 return helper.buildResponse(HttpStatus.UNAUTHORIZED, "fail", "Face mismatch detected", false, distance);
             }
 
         } catch (IOException e) {
-            jakarta.servlet.http.Cookie cookie= cookieU.delCookie("AUTH_TOKEN");
+            jakarta.servlet.http.Cookie cookie= cookieU.delCookie("AUTH_JWT");
             res.addCookie(cookie);
             return helper.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "error", "Image processing failed", false, null);
         } catch (Exception e) {
-            jakarta.servlet.http.Cookie cookie= cookieU.delCookie("AUTH_TOKEN");
+            jakarta.servlet.http.Cookie cookie= cookieU.delCookie("AUTH_JWT");
             res.addCookie(cookie);
             return helper.buildResponse(HttpStatus.SERVICE_UNAVAILABLE, "error", "AI Service Error: " + e.getMessage(), false, null);
         }
@@ -80,7 +79,7 @@ public class AuthenticationService {
 
     public ResponseEntity<String> logout(HttpServletResponse response){
 
-        jakarta.servlet.http.Cookie cookie= cookieU.delCookie("AUTH_TOKEN");
+        jakarta.servlet.http.Cookie cookie= cookieU.delCookie("AUTH_JWT");
         response.addCookie(cookie);
         return ResponseEntity.status(200).body("logout successfully");
     }
