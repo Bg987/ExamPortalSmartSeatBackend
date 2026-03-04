@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 
 @Component
@@ -47,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 2. PUBLIC PATH CHECK: Allow login without a JWT token
         String path = request.getServletPath();
-        if (path.contains("/ExamApi/Auth/login") || path.contains("/public")||path.contains("/api/exam/")) {
+        if (path.contains("/ExamApi/Auth/login") || path.contains("/public")) {
             filterChain.doFilter(request, response);
             return; // Stop processing this filter, move to the next
         }
@@ -64,10 +66,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 4. VALIDATE & AUTHENTICATE
         if (token != null && jwtUtil.validateToken(token)) {
-            String enrollmentNo = jwtUtil.extractEnrollmentNo(token);
+            String id = jwtUtil.extractId(token);
+            String role = jwtUtil.extractRole(token);
 
             UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(enrollmentNo, null, new ArrayList<>());
+                    new UsernamePasswordAuthenticationToken(id, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
 
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
@@ -77,7 +80,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 5. UNAUTHORIZED: No token or expired
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Unauthorized: Please verify your face again.\"}");
+            response.getWriter().write("{\"error\": \"Unauthorized: Please login  again.\"}");
         }
     }
 }

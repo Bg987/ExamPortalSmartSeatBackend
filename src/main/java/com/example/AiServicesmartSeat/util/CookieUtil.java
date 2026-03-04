@@ -12,9 +12,9 @@ public class CookieUtil {
 
     private JwtUtil jwt;
 
-    public jakarta.servlet.http.Cookie setCookie(String enrNumber){
+    public jakarta.servlet.http.Cookie setCookie(Long Id,String role){
 
-        return cookieSetting("AUTH_TOKEN",jwt.generateToken(enrNumber),(24*60*60));
+        return cookieSetting("AUTH_JWT",jwt.generateToken(Id,role),(24*60*60));
     }
     public jakarta.servlet.http.Cookie delCookie(String cookieName){
 

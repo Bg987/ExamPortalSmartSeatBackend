@@ -9,6 +9,7 @@ import org.apache.coyote.BadRequestException;
 import org.apache.tika.Tika;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.Map;
@@ -62,6 +63,11 @@ public class ExamController {
         }
     }
 
+    @PreAuthorize("hasRole('university')")
+    @GetMapping("/test")
+    public String test(){
+        return "protected for studnet";
+    }
 
     @GetMapping("/ExamWithoutQeustions")
     public ResponseEntity<?> ExamWithoutQeustions(){

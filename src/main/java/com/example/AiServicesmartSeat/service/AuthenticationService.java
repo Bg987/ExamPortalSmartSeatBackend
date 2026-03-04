@@ -2,6 +2,7 @@ package com.example.AiServicesmartSeat.service;
 
 import com.example.AiServicesmartSeat.DTO.ApiResponse;
 import com.example.AiServicesmartSeat.entity.StudentEmbedding;
+import com.example.AiServicesmartSeat.entity.Students;
 import com.example.AiServicesmartSeat.repository.StudentEmbeddingRepository;
 import com.example.AiServicesmartSeat.repository.StudentRepository;
 import com.example.AiServicesmartSeat.util.BiometricUtility;
@@ -52,8 +53,12 @@ public class AuthenticationService {
 
             // res. handle from python api
             if (Boolean.TRUE.equals(isVerified)) {
+                Students student = stuRepo
+                        .findByEnrollmentNo(enrNumber)
+                        .orElseThrow(() -> new RuntimeException("Student not found"));
 
-                jakarta.servlet.http.Cookie cookie = cookieU.setCookie(enrNumber);
+                Long studentId = student.getStudentId();
+                jakarta.servlet.http.Cookie cookie = cookieU.setCookie(studentId,"student");
                 res.addCookie(cookie);
                 return helper.buildResponse(HttpStatus.OK, "success", "Identity Verified", true, distance);
             } else {
