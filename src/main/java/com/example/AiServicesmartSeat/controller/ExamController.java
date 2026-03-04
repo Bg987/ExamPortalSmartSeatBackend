@@ -55,6 +55,7 @@ public class ExamController {
         }
         catch (Exception e) {
 
+
             System.out.println("error in question generation = ");
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("status", "error", "message", e.getMessage()));
