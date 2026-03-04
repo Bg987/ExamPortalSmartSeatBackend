@@ -51,8 +51,6 @@ public class ExamController {
 
         }
         catch(BadRequestException e){
-
-
             return ResponseEntity.badRequest().body(Map.of("status", "error", "message", e.getMessage()));
         }
         catch (Exception e) {
