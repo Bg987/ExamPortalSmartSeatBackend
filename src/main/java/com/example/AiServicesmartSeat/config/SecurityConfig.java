@@ -34,10 +34,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/login", "/api/auth/logout", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/ExamApi/Auth/**").permitAll() // Open to everyone
+                        //.requestMatchers("/api/ai/questions/**").authenticated()
+                        .anyRequest().authenticated() // Everything else needs a valid JWT
                 )
 
                 .addFilterBefore(jFiler, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
