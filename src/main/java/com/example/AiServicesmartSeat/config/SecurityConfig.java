@@ -1,6 +1,7 @@
 package com.example.AiServicesmartSeat.config;
 
 import com.example.AiServicesmartSeat.util.JwtAuthenticationFilter;
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,49 +17,51 @@ import java.util.Arrays;
 import java.util.Collections;
 
 @Configuration
-@EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthFilter;
     private final forbiddenHandler myForbiddenHandler;
-    private final CorsConfiguration corsConfiguration;
+    private final JwtAuthenticationFilter jFiler;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 1. Disable CSRF (not needed for Stateless JWT APIs)
-                .csrf(csrf -> csrf.disable())
-
-                // 2. Configure CORS (Must allow your Angular URL)
+                .csrf(csrf -> csrf.disable()) // Disable CSRF for JWT
+                // Link directly to the bean defined below
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // 3. Set Session to Stateless (Don't store sessions on server)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // 4. Define Route Permissions
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/ExamApi/Auth/**").permitAll() // Open to everyone
-                        //.requestMatchers("/api/ai/questions/**").authenticated()
-                        .anyRequest().authenticated() // Everything else needs a valid JWT
+                        .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/logout", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .requestMatchers("/api/**").authenticated()
                 )
 
-                // 5. THE MAGIC LINE: Put your JWT filter before the default one
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exception -> exception
-                        .accessDeniedHandler(myForbiddenHandler));
+                .addFilterBefore(jFiler, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception -> exception.accessDeniedHandler(myForbiddenHandler));
+
         return http.build();
     }
 
     @Bean
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
-        config.setAllowCredentials(true); // CRITICAL: Allows cookies to be sent
-        config.setAllowedOrigins(java.util.List.of("http://localhost:4200","https://smart-seat-frontend-three.vercel.app")); // Your Angular URL
-        config.setAllowedHeaders(java.util.List.of("Origin", "Content-Type", "Accept", "Authorization"));
+
+        config.setAllowCredentials(true);
+
+        // Combined all your origins here (NO trailing slashes)
+        config.setAllowedOrigins(java.util.List.of(
+                "http://localhost:4200",
+                "https://smart-seat-frontend-three.vercel.app",
+                "https://exam-portal-smart-seat-frontend.vercel.app"
+        ));
+
+        config.setAllowedHeaders(java.util.List.of("Origin", "Content-Type", "Accept", "Authorization", "Set-Cookie"));
         config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setExposedHeaders(java.util.List.of("Authorization", "Set-Cookie"));
 
         org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
