@@ -34,18 +34,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // 1. SEB CHECK: Every request must come from SEB
-//        String userAgent = request.getHeader("User-Agent");
-//        String requestConfigKey = request.getHeader("X-SafeExamBrowser-ConfigKeyhash");
-//        boolean isSeb = (userAgent != null && userAgent.contains("SEB"));
-//        boolean isKeyValid = (requestConfigKey != null && requestConfigKey.equals(ALLOWED_CONFIG_KEY));
-
-//        if (!isSeb || !isKeyValid) {
-//            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-//            response.setContentType("application/json");
-//            response.getWriter().write("{\"error\": \"Unauthorized: Please use the official SeatWise SEB file.\"}");
-//            return; // Stop here!
-//        }
 
         // 2. PUBLIC PATH CHECK: Allow login without a JWT token
         String path = request.getServletPath();
@@ -81,6 +69,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String id = jwtUtil.extractId(token);
         String role = jwtUtil.extractRole(token);
 
+        //ensure stundents open exam portal in safe exam browser
+        if(role.equals("student")){
+            // 1. SEB CHECK: Every request must come from SEB
+//        String userAgent = request.getHeader("User-Agent");
+//        String requestConfigKey = request.getHeader("X-SafeExamBrowser-ConfigKeyhash");
+//        boolean isSeb = (userAgent != null && userAgent.contains("SEB"));
+//        boolean isKeyValid = (requestConfigKey != null && requestConfigKey.equals(ALLOWED_CONFIG_KEY));
+
+//        if (!isSeb || !isKeyValid) {
+//            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+//            response.setContentType("application/json");
+//            response.getWriter().write("{\"error\": \"Unauthorized: Please use the official SeatWise SEB file.\"}");
+//            return; // Stop here!
+//        }
+        }
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(
                         id,

@@ -23,6 +23,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final forbiddenHandler myForbiddenHandler;
+    private final CorsConfiguration corsConfiguration;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,14 +32,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 // 2. Configure CORS (Must allow your Angular URL)
-                .cors(cors -> cors.configurationSource(request -> {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
-                    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    config.setAllowedHeaders(Collections.singletonList("*"));
-                    config.setAllowCredentials(true); // REQUIRED for HttpOnly Cookies
-                    return config;
-                }))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 // 3. Set Session to Stateless (Don't store sessions on server)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -56,5 +50,18 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .accessDeniedHandler(myForbiddenHandler));
         return http.build();
+    }
+
+    @Bean
+    public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
+        org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
+        config.setAllowCredentials(true); // CRITICAL: Allows cookies to be sent
+        config.setAllowedOrigins(java.util.List.of("http://localhost:4200","https://smart-seat-frontend-three.vercel.app")); // Your Angular URL
+        config.setAllowedHeaders(java.util.List.of("Origin", "Content-Type", "Accept", "Authorization"));
+        config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+
+        org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }
