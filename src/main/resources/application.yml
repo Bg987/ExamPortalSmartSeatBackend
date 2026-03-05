@@ -29,7 +29,7 @@ spring:
 
     ai:
         ollama:
-            base-url: http://localhost:11434
+            base-url: https://unshowering-uneliminated-aurelia.ngrok-free.dev
             chat:
                 options:
                     # llama3.2 is excellent for MCQs, but you can also use mistral or gemma2
