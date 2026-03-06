@@ -27,6 +27,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.disable()) // Typical for proxies
+                )
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for JWT
                 // Link directly to the bean defined below
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
