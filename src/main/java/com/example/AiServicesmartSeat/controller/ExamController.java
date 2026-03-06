@@ -19,7 +19,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/exam")
+@RequestMapping("/api2/exam")
 
 public class ExamController {
 
