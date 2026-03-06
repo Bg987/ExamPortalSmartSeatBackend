@@ -55,7 +55,8 @@ public class SecurityConfig {
         // Combined all your origins here (NO trailing slashes)
         config.setAllowedOrigins(java.util.List.of(
                 "http://localhost:4200",
-                "https://*.vercel.app" // Allows any Vercel deployment for your project
+                "https://smart-seat-frontend-three.vercel.app", // Your main Vercel URL
+                "https://exam-portal-smart-seat-frontend.vercel.app"
         ));
 
         config.setAllowedHeaders(java.util.List.of("Origin", "Content-Type", "Accept", "Authorization", "Set-Cookie"));
