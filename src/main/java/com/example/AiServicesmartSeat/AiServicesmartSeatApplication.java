@@ -2,6 +2,7 @@ package com.example.AiServicesmartSeat;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @EnableAsync
@@ -9,6 +10,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
 		"org.springframework.ai.model.google.genai.autoconfigure.embedding.GoogleGenAiEmbeddingConnectionAutoConfiguration",
 		"org.springframework.ai.model.google.genai.autoconfigure.embedding.GoogleGenAiTextEmbeddingAutoConfiguration"
 })
+@EnableCaching
+
+
 public class AiServicesmartSeatApplication {
 
 	public static void main(String[] args) {

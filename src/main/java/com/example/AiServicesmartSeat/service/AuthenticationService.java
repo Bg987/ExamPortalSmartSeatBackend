@@ -31,19 +31,19 @@ public class AuthenticationService {
     private final CookieUtil cookieU;
     private final BiometricUtility BiometricUtil;
     private final HelperMethod helper;
-
+    private final JwtUtil jwtUtil;
 
     public ResponseEntity<ApiResponse> faceAuth(String enrNumber, MultipartFile image, HttpServletResponse res) {
         try {
             //Check if Student exists in Primary Table
             if (!stuRepo.existsByEnrollmentNo(enrNumber)) {
-                return helper.buildResponse(HttpStatus.NOT_FOUND, "error", "Enrollment number not found", false, null);
+                return helper.buildResponse(HttpStatus.NOT_FOUND, "error", "Enrollment number not found", false, null,null);
             }
 
             //fetch embeddings if student found in database
             float[] storedEmbedding = BiometricUtil.embeddingsFromEnrNumber(enrNumber);
             if(storedEmbedding==null){
-                return helper.buildResponse(HttpStatus.BAD_REQUEST, "error", "No face data registered for this student", false, null);
+                return helper.buildResponse(HttpStatus.BAD_REQUEST, "error", "No face data registered for this student", false, null,null);
             }
 
             //image verification
@@ -59,21 +59,25 @@ public class AuthenticationService {
                 Long studentId = student.getStudentId();
                 jakarta.servlet.http.Cookie cookie = cookieU.setCookie(studentId,"student");
                 res.addCookie(cookie);
-                return helper.buildResponse(HttpStatus.OK, "success", "Identity Verified", true, distance);
+
+                //for compiler backend authentication
+                String token2 = jwtUtil.generatToken2(student.getEmail(),"STUDENT");
+
+                return helper.buildResponse(HttpStatus.OK, "success", "Identity Verified", true, distance,token2);
             } else {
                 jakarta.servlet.http.Cookie cookie= cookieU.delCookie("AUTH_JWT");
                 res.addCookie(cookie);
-                return helper.buildResponse(HttpStatus.UNAUTHORIZED, "fail", "Face mismatch detected", false, distance);
+                return helper.buildResponse(HttpStatus.UNAUTHORIZED, "fail", "Face mismatch detected", false, distance,null);
             }
 
         } catch (IOException e) {
             jakarta.servlet.http.Cookie cookie= cookieU.delCookie("AUTH_JWT");
             res.addCookie(cookie);
-            return helper.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "error", "Image processing failed", false, null);
+            return helper.buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "error", "Image processing failed", false, null,null);
         } catch (Exception e) {
             jakarta.servlet.http.Cookie cookie= cookieU.delCookie("AUTH_JWT");
             res.addCookie(cookie);
-            return helper.buildResponse(HttpStatus.SERVICE_UNAVAILABLE, "error", "AI Service Error: " + e.getMessage(), false, null);
+            return helper.buildResponse(HttpStatus.SERVICE_UNAVAILABLE, "error", "AI Service Error: " + e.getMessage(), false, null,null);
         }
     }
 

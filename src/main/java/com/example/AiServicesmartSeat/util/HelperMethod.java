@@ -9,13 +9,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class HelperMethod {
 
-    public ResponseEntity<ApiResponse> buildResponse(HttpStatus code, String status, String msg, Boolean verified, Double dist) {
+    public ResponseEntity<ApiResponse> buildResponse(HttpStatus code, String status, String msg, Boolean verified, Double dist,String token) {
         return ResponseEntity.status(code).body(
                 ApiResponse.builder()
                         .status(status)
                         .message(msg)
                         .verified(verified)
                         .distance(dist)
+                        .data(token)
                         .build()
         );
     }

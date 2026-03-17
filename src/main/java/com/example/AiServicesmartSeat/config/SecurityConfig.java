@@ -39,7 +39,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/ExamApi/Auth/**").permitAll() // Open to everyone
+                        .requestMatchers("/ExamApi/Auth/**","api/exam/**").permitAll() // Open to everyone
                         //.requestMatchers("/api/ai/questions/**").authenticated()
                         .requestMatchers("/api/**").authenticated()
                 )
@@ -58,8 +58,8 @@ public class SecurityConfig {
 
         // Combined all your origins here (NO trailing slashes)
         config.setAllowedOrigins(java.util.List.of(
-                "http://localhost:4200",
-                "https://smart-seat-frontend-three.vercel.app", // Your main Vercel URL
+                "http://localhost:4201",
+                "https://proxy-0xaq.onrender.com/api2", // Your main Vercel URL
                 "https://exam-portal-smart-seat-frontend.vercel.app"
         ));
 

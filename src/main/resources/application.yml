@@ -38,8 +38,7 @@ spring:
                     # This helps local models stick to the JSON format you need
                     format: json
             init:
-                timeout: 600s # Increase to 10 minutes
-
+                timeout: 600s
     servlet:
         multipart:
             enabled: true
@@ -52,6 +51,5 @@ logging:
         org:
             springframework:
                 ai: DEBUG
-                security: DEBUG
             apache:
                 tika: ERROR

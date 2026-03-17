@@ -18,7 +18,7 @@ public class CookieUtil {
     }
     public jakarta.servlet.http.Cookie delCookie(String cookieName){
 
-        return cookieSetting(cookieName,null,0);
+        return cookieSetting(cookieName,"",0);
 
     }
     public jakarta.servlet.http.Cookie cookieSetting(String cookieName, String cookieData, int age) {
@@ -27,7 +27,7 @@ public class CookieUtil {
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setMaxAge(age);
-        cookie.setSecure(false);
+        cookie.setSecure(true);
         // 'Lax' is usually fine for local, but some older browsers
         // prefer no SameSite attribute on plain HTTP
         //cookie.setSecure(true);

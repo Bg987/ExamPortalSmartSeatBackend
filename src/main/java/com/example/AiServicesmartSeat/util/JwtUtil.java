@@ -2,6 +2,7 @@ package com.example.AiServicesmartSeat.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,20 +15,38 @@ import java.util.Date;
 public class JwtUtil {
 
 
-    private final SecretKey key;
+    private final SecretKey key1;
+    private final SecretKey key2;
 
     // Spring injects "sec" right here, safely
-    public JwtUtil(@Value("ZmFrZVNlY3JldEtleUZha2VTZWNyZXRLZXlGYWtlU2VjcmV0") String sec) {
-        this.key = Keys.hmacShaKeyFor(sec.getBytes(StandardCharsets.UTF_8));
+    public JwtUtil(@Value("ZmFrZVNlY3JldEtleUZha2VTZWNyZXRLZXlGYWtlU2VjcmV0") String sec1,
+                   @Value("MySecretKeyForPODProjectWhichIsVeryLongAndSecure2026") String sec2) {
+        this.key1 = Keys.hmacShaKeyFor(sec1.getBytes(StandardCharsets.UTF_8));
+        this.key2 = Keys.hmacShaKeyFor(sec2.getBytes(StandardCharsets.UTF_8));
     }
 
+
+
+    //for smartseat backend
     public String generateToken(Long id ,String role) {
         return Jwts.builder()
                 .claim("id",id)
                 .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 10)))
-                .signWith(key)
+                .signWith(key1)
+                .compact();
+    }
+
+    //for compiler backend
+    public String generatToken2(String email,String role) {
+
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("role",role)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + 86400000))
+                .signWith(key2, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -41,7 +60,7 @@ public class JwtUtil {
 
     private Claims getClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(key1)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -49,7 +68,7 @@ public class JwtUtil {
 
     public Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(key1)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
