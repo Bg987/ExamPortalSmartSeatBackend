@@ -39,7 +39,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/ExamApi/Auth/**","api/exam/**").permitAll() // Open to everyone
+                        .requestMatchers("/ExamApi/Auth/**").permitAll() // Open to everyone
                         //.requestMatchers("/api/ai/questions/**").authenticated()
                         .requestMatchers("/api/**").authenticated()
                 )
