@@ -79,6 +79,7 @@ public class ExamController {
         return ResponseEntity.ok(res);
     }
 
+
     @GetMapping("/health")
     public ResponseEntity<?> health()
     {

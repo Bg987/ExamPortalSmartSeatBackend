@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Map;
 
 public interface TimetableRepo extends JpaRepository<Timetable, Long> {
 
@@ -22,4 +23,22 @@ public interface TimetableRepo extends JpaRepository<Timetable, Long> {
     Boolean isQuestionGenerated(@Param("id") Long id);
 
     List<Timetable> findByquestionGeneratedFalse();
+
+        @Query("""
+    SELECT DISTINCT t.id as id, 
+           CONCAT(t.branch, ' - Sem ', t.semester, ' - ', t.subjectId, ' - ', t.examDate) as examName,
+           t.startTime as startTime,
+           t.examDate as examDate
+    FROM SeatAllocation s 
+    JOIN s.timetable t
+    WHERE s.college.id = :collegeId 
+      AND t.allocated = true 
+      AND t.completed = false
+      AND t.examDate = CURRENT_DATE
+      AND t.startTime <=:limit
+    """)
+        List<Map<String, Object>> findExamsWithin15MinWindow(
+                @Param("collegeId") Long collegeId,
+                @Param("limit") java.time.LocalTime limit
+        );
 }

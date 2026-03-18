@@ -19,9 +19,19 @@ public class QuestionEntity {
     private String examId;
 
     private List<QuestionData> questions;
+    private String examPassword;
 
     public  QuestionEntity(String examId, List<QuestionData> questions) {
         this.examId = examId;
         this.questions = questions;
+    }
+
+
+    public void setExamPassword(String password) {
+        if (password != null && password.length() == 6) {
+            this.examPassword = password;
+        } else {
+            throw new IllegalArgumentException("Password must be exactly 6 characters.");
+        }
     }
 }

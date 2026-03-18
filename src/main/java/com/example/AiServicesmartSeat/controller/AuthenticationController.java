@@ -18,7 +18,6 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/ExamApi/Auth")
-@CrossOrigin(origins = "*")
 public class AuthenticationController {
 
     private final AuthenticationService authService;

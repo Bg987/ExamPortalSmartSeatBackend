@@ -19,5 +19,8 @@ public interface StudentRepository extends JpaRepository<Students, String> {
 
     boolean existsByEnrollmentNo(String enrollmentNo);
 
+    @Query("SELECT s.enrollmentNo FROM Students s WHERE s.studentId = :studentId")
+    Optional<String> findEnrollmentNoByStudentId(@Param("studentId") Long studentId);
+
     Optional<Students> findByEnrollmentNo(String enrollmentNo);
 }

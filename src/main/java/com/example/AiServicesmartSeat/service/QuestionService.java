@@ -70,15 +70,18 @@ public class QuestionService {
                         })
                         .collect(Collectors.toList());
 
+                String randomPassword = generateExamCode(6);
                 // 2. Create ONE single document for the whole exam
                 QuestionEntity examPaper = new QuestionEntity();
                 examPaper.setExamId(String.valueOf(examId));
                 examPaper.setQuestions(questionList);
+                examPaper.setExamPassword(randomPassword); // Set the generated password
+
 
                 // 3. Save the single document to MongoDB
                 questionRepository.save(examPaper);
                 timetableRepo.markAsGenerated(examId);
-                System.out.println("✅ Saved single document for Exam ID: " + examId + " with " + questionList.size() + " questions.");
+                System.out.println("✅ Saved single document and password for Exam ID: " + examId + " with " + questionList.size() + " questions.");
             } else {
                 System.out.println(">>> AI returned an empty list.");
             }
@@ -95,5 +98,18 @@ public class QuestionService {
 
     private String truncateContext(String text, int maxLength) {
         return (text == null || text.length() <= maxLength) ? text : text.substring(0, maxLength);
+    }
+
+    private String generateExamCode(int length) {
+        // Exclude O, 0, I, 1 to prevent student confusion during the exam
+        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        StringBuilder sb = new StringBuilder();
+        java.security.SecureRandom random = new java.security.SecureRandom();
+
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(chars.length());
+            sb.append(chars.charAt(index));
+        }
+        return sb.toString();
     }
 }

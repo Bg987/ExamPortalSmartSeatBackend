@@ -59,6 +59,7 @@ public class SecurityConfig {
         // Combined all your origins here (NO trailing slashes)
         config.setAllowedOrigins(java.util.List.of(
                 "http://localhost:4201",
+                "http://localhost:4200",
                 "https://proxy-0xaq.onrender.com/api2", // Your main Vercel URL
                 "https://exam-portal-smart-seat-frontend.vercel.app"
         ));
