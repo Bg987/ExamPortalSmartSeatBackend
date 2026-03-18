@@ -31,7 +31,7 @@ public class CookieUtil {
         // 'Lax' is usually fine for local, but some older browsers
         // prefer no SameSite attribute on plain HTTP
         //cookie.setSecure(true);
-        //cookie.setAttribute("SameSite", "None"); // CRITICAL for Chrome/Safari
+        cookie.setAttribute("SameSite", "None");
         return cookie;
     }
 }
