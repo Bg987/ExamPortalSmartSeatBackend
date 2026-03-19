@@ -41,7 +41,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/ExamApi/Auth/**").permitAll() // Open to everyone
                         //.requestMatchers("/api/ai/questions/**").authenticated()
-                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().authenticated()
                 )
 
                 .addFilterBefore(jFiler, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
