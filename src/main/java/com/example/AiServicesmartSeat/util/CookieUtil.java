@@ -31,7 +31,10 @@ public class CookieUtil {
         // 'Lax' is usually fine for local, but some older browsers
         // prefer no SameSite attribute on plain HTTP
         //cookie.setSecure(true);
-        cookie.setAttribute("SameSite", "None");
+//        cookie.setAttribute("SameSite", "None");
+        cookie.setDomain("proxy-0xaq.onrender.com");
+        // REQUIRED for Cross-Site cookie persistence
+        cookie.setAttribute("SameSite", "Lax");
         return cookie;
     }
 }
