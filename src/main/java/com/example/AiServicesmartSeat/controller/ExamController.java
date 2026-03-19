@@ -1,8 +1,11 @@
 package com.example.AiServicesmartSeat.controller;
 
+import com.example.AiServicesmartSeat.DTO.StudentExamView;
+import com.example.AiServicesmartSeat.entity.QuestionEntity;
 import com.example.AiServicesmartSeat.entity.Timetable;
 import com.example.AiServicesmartSeat.repository.QuestionRepository;
 import com.example.AiServicesmartSeat.repository.TimetableRepo;
+import com.example.AiServicesmartSeat.service.ExamService;
 import com.example.AiServicesmartSeat.service.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
@@ -25,6 +28,7 @@ public class ExamController {
 
     private final QuestionService questionService;
     private final TimetableRepo timetableRepo;
+    private final ExamService examService;
     private final Tika tika = new Tika();
 
 
@@ -77,6 +81,36 @@ public class ExamController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("not found colleges for this exam");
         }
         return ResponseEntity.ok(res);
+    }
+
+    @PreAuthorize("hasRole('student')")
+    @PostMapping("/verify/{examId}")
+    public ResponseEntity<?> enterExam(@PathVariable Long examId, @RequestBody Map<String, String> payload) {
+        String password = payload.get("password");
+        try {
+
+            //ensure access exam before 25 minute of start time
+            if(!examService.validateStudent(examId)){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error","Exam not accessible yet"));
+            }
+
+            //check student is actually register for this exam or not
+            else if(examService.validateStudent(examId)==null){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error","You are not register for this exam"));
+            }
+
+            // This call now validates password EVERY TIME but fetches questions from CACHE
+            StudentExamView studentView = examService.verifyAndGetView(examId, password);
+
+            return ResponseEntity.ok(Map.of("sucess", true, "data", studentView));
+
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "An error occurred during verification."));
+        }
     }
 
 

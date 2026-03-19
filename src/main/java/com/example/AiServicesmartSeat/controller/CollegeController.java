@@ -32,7 +32,7 @@ public class CollegeController {
         if (data.isEmpty()) {
             return ResponseEntity.ok(Map.of(
                     "status", "EMPTY",
-                    "message", "No exams currently in college within the 15-minute authorization window."
+                    "message", "No exams currently in college within the 30-minute authorization window."
             ));
         }
 

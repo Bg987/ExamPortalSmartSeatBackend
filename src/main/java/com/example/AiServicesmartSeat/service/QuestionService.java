@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -70,13 +71,13 @@ public class QuestionService {
                         })
                         .collect(Collectors.toList());
 
-                String randomPassword = generateExamCode(6);
+
                 // 2. Create ONE single document for the whole exam
                 QuestionEntity examPaper = new QuestionEntity();
                 examPaper.setExamId(String.valueOf(examId));
                 examPaper.setQuestions(questionList);
+                String randomPassword = generateExamCode(6);
                 examPaper.setExamPassword(randomPassword); // Set the generated password
-
 
                 // 3. Save the single document to MongoDB
                 questionRepository.save(examPaper);

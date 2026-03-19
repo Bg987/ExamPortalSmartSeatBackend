@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/ExamApi/Auth")
+@RequestMapping("/api/Auth")
 public class AuthenticationController {
 
     private final AuthenticationService authService;

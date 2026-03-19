@@ -25,13 +25,4 @@ public class QuestionEntity {
         this.examId = examId;
         this.questions = questions;
     }
-
-
-    public void setExamPassword(String password) {
-        if (password != null && password.length() == 6) {
-            this.examPassword = password;
-        } else {
-            throw new IllegalArgumentException("Password must be exactly 6 characters.");
-        }
-    }
 }

@@ -19,7 +19,7 @@ public class CollegeService {
 
     public List<Map<String, Object>> getUpcomingExamsWithPasswords(Long collegeId) {
         LocalTime now = LocalTime.now();
-        LocalTime limit = now.plusMinutes(15);
+        LocalTime limit = now.plusMinutes(30);
 
         List<Map<String, Object>> sqlResults = timetableRepo.findExamsWithin15MinWindow(collegeId, limit);
 
