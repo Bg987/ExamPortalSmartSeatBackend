@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Data
@@ -14,6 +16,7 @@ public class StudentExamView implements Serializable { // Serializable is requir
     private String examId;
     private String subjectName;
     private Integer duration;
+    private LocalTime startTime; // Added Start Time
     private List<StudentQuestion> questions;
 
     @Data

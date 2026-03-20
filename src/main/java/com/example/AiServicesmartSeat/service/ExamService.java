@@ -1,6 +1,7 @@
 package com.example.AiServicesmartSeat.service;
 
 
+import com.example.AiServicesmartSeat.DTO.ExamSyncDTO;
 import com.example.AiServicesmartSeat.DTO.StudentExamView;
 import com.example.AiServicesmartSeat.entity.QuestionEntity;
 import com.example.AiServicesmartSeat.entity.SeatAllocation;
@@ -11,9 +12,15 @@ import com.example.AiServicesmartSeat.repository.TimetableRepo;
 import com.example.AiServicesmartSeat.util.HelperMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,8 +31,9 @@ public class ExamService {
     private final TimetableRepo timetableRepo;
     private final QuestionRepository questionRepo;
     private final SeatAllocationRepo seatRepo;
-    // REMOVED: private final SeatAllocation allocation; <-- This was the error
     private final HelperMethod helper;
+    private final MongoTemplate mongoTemplate;
+
 
     public Boolean validateStudent(Long examId) {
         String enrNumber = helper.getEnrNumberIdByUserId();
@@ -84,7 +92,27 @@ public class ExamService {
                 examPaper.getExamId(),
                 timetable.getSubjectName(),
                 timetable.getDurationMinutes(),
+                timetable.getStartTime(),
                 cleanQuestions
         );
+    }
+
+    @Async("examTaskExecutor")
+    public void processSyncRequest(ExamSyncDTO dto, String enrNumber) {
+        // Find by Student + Exam
+        Query query = new Query(Criteria.where("enrNumber").is(enrNumber)
+                .and("examId").is(dto.getExamId()));
+
+        // Overwrite the answers map
+        Update update = new Update()
+                .set("answers", dto.getAnswers())
+                .set("lastSynced", LocalDateTime.now())
+                .set("status", "IN_PROGRESS");
+
+        // Perform the write to MongoDB
+        mongoTemplate.upsert(query, update, "student_submissions");
+
+        // Optional: Log for your own debugging
+        System.out.println("Async Sync Complete for: " + enrNumber);
     }
 }

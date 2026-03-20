@@ -57,8 +57,8 @@ public class Timetable {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime examStart = LocalDateTime.of(this.examDate, this.startTime);
 
-        // Allowed between (Start - 25 mins) AND (Start + 3 Hours)
-        return now.isAfter(examStart.minusMinutes(25)) &&
+        // Allowed between (Start - 2 mins) AND (Start + 3 Hours)
+        return now.isAfter(examStart.minusMinutes(2)) &&
                 now.isBefore(examStart.plusMinutes(durationMinutes));
     }
 }

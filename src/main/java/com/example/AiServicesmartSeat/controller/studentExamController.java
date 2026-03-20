@@ -1,6 +1,7 @@
 package com.example.AiServicesmartSeat.controller;
 
 import com.example.AiServicesmartSeat.service.StudentService;
+import com.example.AiServicesmartSeat.util.HelperMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +20,10 @@ import java.util.Map;
 public class studentExamController {
 
     private final StudentService stuService;
+    private final HelperMethod helper;
+
+
+
 
     @PreAuthorize("hasRole('student')")
     @GetMapping("/getStudentIncomplteExam")
@@ -33,6 +39,10 @@ public class studentExamController {
                     .status(HttpStatus.NOT_FOUND)
                     .body("No incomplete exams found for you.");
         }
-        return ResponseEntity.ok(examNameAndId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("enrNumber", enrNumber);
+        response.put("exams", examNameAndId);
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.AiServicesmartSeat.controller;
 
+import com.example.AiServicesmartSeat.DTO.ExamSyncDTO;
 import com.example.AiServicesmartSeat.DTO.StudentExamView;
 import com.example.AiServicesmartSeat.entity.QuestionEntity;
 import com.example.AiServicesmartSeat.entity.Timetable;
@@ -7,6 +8,7 @@ import com.example.AiServicesmartSeat.repository.QuestionRepository;
 import com.example.AiServicesmartSeat.repository.TimetableRepo;
 import com.example.AiServicesmartSeat.service.ExamService;
 import com.example.AiServicesmartSeat.service.QuestionService;
+import com.example.AiServicesmartSeat.util.HelperMethod;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.apache.tika.Tika;
@@ -28,6 +30,7 @@ public class ExamController {
 
     private final QuestionService questionService;
     private final TimetableRepo timetableRepo;
+    private final HelperMethod helper;
     private final ExamService examService;
     private final Tika tika = new Tika();
 
@@ -83,15 +86,16 @@ public class ExamController {
         return ResponseEntity.ok(res);
     }
 
+
     @PreAuthorize("hasRole('student')")
     @PostMapping("/verify/{examId}")
     public ResponseEntity<?> enterExam(@PathVariable Long examId, @RequestBody Map<String, String> payload) {
         String password = payload.get("password");
         try {
 
-            //ensure access exam before 25 minute of start time
+            //ensure access exam before 2 minute of start time
             if(!examService.validateStudent(examId)){
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error","Exam not accessible yet"));
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error","The exam will be available 2 minutes before the start time."));
             }
 
             //check student is actually register for this exam or not
@@ -113,6 +117,17 @@ public class ExamController {
         }
     }
 
+    @PostMapping("/sync")
+    public ResponseEntity<?> sync(@RequestBody ExamSyncDTO dto) {
+        // 1. Get enrNumber from Session/SecurityContext
+        String enrNumber = helper.getEnrNumberIdByUserId();
+
+        // 2. Hand off to the Async Service (Non-blocking)
+        examService.processSyncRequest(dto, enrNumber);
+
+        // 3. Return immediately (The student sees "Saved" instantly)
+        return ResponseEntity.ok().build();
+    }
 
     @GetMapping("/health")
     public ResponseEntity<?> health()
