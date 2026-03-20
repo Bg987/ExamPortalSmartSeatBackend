@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 
 @Entity
@@ -54,11 +57,19 @@ public class Timetable {
     private boolean questionGenerated = false;
 
     public boolean isAccessAllowed() {
-        LocalDateTime now = LocalDateTime.now();
+
+
+        // for deployment and local
+        LocalDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).toLocalDateTime();
+
+        // The Exam Start Time (Expected to be in IST)
         LocalDateTime examStart = LocalDateTime.of(this.examDate, this.startTime);
 
-        // Allowed between (Start - 2 mins) AND (Start + 3 Hours)
-        return now.isAfter(examStart.minusMinutes(2)) &&
-                now.isBefore(examStart.plusMinutes(durationMinutes));
+        // --- ACCESS LOGIC ---
+        // Allowed from 2 minutes before start until the end of the duration
+        boolean afterStartBuffer = now.isAfter(examStart.minusMinutes(2));
+        boolean beforeEnd = now.isBefore(examStart.plusMinutes(this.durationMinutes));
+
+        return afterStartBuffer && beforeEnd;
     }
 }
