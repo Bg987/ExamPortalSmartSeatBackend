@@ -37,4 +37,12 @@ public interface SeatAllocationRepo extends JpaRepository<SeatAllocation, Long> 
     void markAsAttended(String enr, Long tId);
 
 
+    //as exam submit set allocation table too
+    @Transactional
+    @Modifying
+    @Query("UPDATE SeatAllocation s SET s.isSubmitted = true " +
+            "WHERE s.student.enrollmentNo = :enrNumber " +
+            "AND s.timetable.id = :timetableId")
+    int markAsSubmitted(@Param("enrNumber") String enrNumber,
+                        @Param("timetableId") Long timetableId);
 }

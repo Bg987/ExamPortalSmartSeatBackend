@@ -21,6 +21,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,7 +42,7 @@ public class ExamService {
 
         // Check if student is even allocated to this exam
         if (!seatRepo.existsByStudent_EnrollmentNoAndTimetable_Id(enrNumber, examId)) {
-            return null; // Not assigned to this seat
+            return null; // Not assigned seat to student for this exam
         }
 
         Timetable timetable = timetableRepo.findById(examId)
@@ -55,16 +57,14 @@ public class ExamService {
     public StudentExamView verifyAndGetView(Long examId, String inputPassword) {
         String enrNumber = helper.getEnrNumberIdByUserId();
 
-        // 1. Fetch the specific allocation for THIS student and THIS exam
+        //Fetch the specific allocation for THIS student and THIS exam
         SeatAllocation currentAllocation = seatRepo.findByStudent_EnrollmentNoAndTimetable_Id(enrNumber, examId)
                 .orElseThrow(() -> new SecurityException("No seat allocation found for this student."));
 
-        // 2. Logic: If attendance is ALREADY true, skip password check
-        if (currentAllocation.isAttendance()) {
-            return getCachedStudentView(examId);
+        if (currentAllocation.isSubmitted()) {
+            throw new IllegalArgumentException("Exam is over. You have already submitted your response.");
         }
 
-        // 3. First time entry: Check Password
         QuestionEntity examPaper = questionRepo.findByExamId(String.valueOf(examId))
                 .orElseThrow(() -> new RuntimeException("Exam paper not found"));
 
@@ -98,20 +98,23 @@ public class ExamService {
     }
 
     @Async("examTaskExecutor")
-    public void processSyncRequest(ExamSyncDTO dto, String enrNumber) {
+    public void processSyncRequest(ExamSyncDTO dto, String enrNumber,String status) {
         // Find by Student + Exam
         Query query = new Query(Criteria.where("enrNumber").is(enrNumber)
                 .and("examId").is(dto.getExamId()));
 
+        LocalDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).toLocalDateTime();
         // Overwrite the answers map
         Update update = new Update()
                 .set("answers", dto.getAnswers())
-                .set("lastSynced", LocalDateTime.now())
-                .set("status", "IN_PROGRESS");
+                .set("lastSynced",now)
+                .set("status",status);
 
         // Perform the write to MongoDB
         mongoTemplate.upsert(query, update, "student_submissions");
-
+        if(status.equals("COMPLETE")){
+            seatRepo.markAsSubmitted(enrNumber, Long.valueOf(dto.getExamId()));
+        }
         // Optional: Log for your own debugging
         System.out.println("Async Sync Complete for: " + enrNumber);
     }

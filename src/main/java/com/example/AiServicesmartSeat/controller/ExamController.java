@@ -17,6 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
@@ -95,7 +98,7 @@ public class ExamController {
 
             //ensure access exam before 2 minute of start time
             if(!examService.validateStudent(examId)){
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error","The exam will be available 2 minutes before the start time."));
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error","Access denied. You can only enter between 2 minutes before the start time and the scheduled end of the exam."));
             }
 
             //check student is actually register for this exam or not
@@ -113,7 +116,8 @@ public class ExamController {
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "An error occurred during verification."));
+            //e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -123,10 +127,29 @@ public class ExamController {
         String enrNumber = helper.getEnrNumberIdByUserId();
 
         // 2. Hand off to the Async Service (Non-blocking)
-        examService.processSyncRequest(dto, enrNumber);
+        examService.processSyncRequest(dto, enrNumber,"IN_PROGRESS");
 
         // 3. Return immediately (The student sees "Saved" instantly)
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/submit")
+    public ResponseEntity<Map<String, String>> submit(@RequestBody ExamSyncDTO dto) {
+        String enrNumber = helper.getEnrNumberIdByUserId();
+
+        try {
+            // Finalize and lock the submission
+            examService.processSyncRequest(dto, enrNumber,"COMPLETE");
+
+            Map<String, String> response = new HashMap<>();
+            response.put("status", "SUCCESS");
+            response.put("message", "Exam locked and submitted successfully.");
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("error", "Failed to finalize submission."));
+        }
     }
 
     @GetMapping("/health")
