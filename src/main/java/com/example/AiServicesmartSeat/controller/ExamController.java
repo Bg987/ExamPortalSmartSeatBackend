@@ -46,18 +46,17 @@ public class ExamController {
             @RequestParam Long examId) {
 
         try {
-            // Extract text from PDF
+
             if(timetableRepo.isQuestionGenerated(examId)){
                 throw new BadRequestException("question already generated for this exam");
             }
+            // Extract text from PDF
             String extractedText = tika.parseToString(file.getInputStream());
-
-            // This service method already has System.out.println logic
-            // to print questions to the console
-            questionService.generateQuestions(extractedText.substring(0,2000), count,examId);
+            String currentUserId = helper.getId();
+            questionService.generateQuestions(extractedText.substring(0,2000), count,examId,currentUserId);
 
             // Return simple OK response
-            return ResponseEntity.ok(Map.of("status", "ok", "message", "questions generate in background"));
+            return ResponseEntity.ok(Map.of("status", "ok", "message", "questions generation started in background"));
 
         }
         catch(BadRequestException e){

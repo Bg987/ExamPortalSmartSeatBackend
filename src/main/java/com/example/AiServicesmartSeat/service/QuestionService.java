@@ -1,10 +1,13 @@
 package com.example.AiServicesmartSeat.service;
 
 import com.example.AiServicesmartSeat.DTO.QuestionDTO;
+import com.example.AiServicesmartSeat.entity.Notification;
 import com.example.AiServicesmartSeat.entity.QuestionEntity;
 import com.example.AiServicesmartSeat.entity.QuestionData;
+import com.example.AiServicesmartSeat.repository.NotificationRepository;
 import com.example.AiServicesmartSeat.repository.QuestionRepository;
 import com.example.AiServicesmartSeat.repository.TimetableRepo;
+import com.example.AiServicesmartSeat.util.HelperMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.core.ParameterizedTypeReference;
@@ -12,6 +15,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,9 +30,11 @@ public class QuestionService {
     private final ChatClient chatClient;
     private final TimetableRepo timetableRepo;
     private final QuestionRepository questionRepository;
+    private final NotificationRepository notificationRepo;
+    private final HelperMethod helper;
 
     @Async
-    public void generateQuestions(String contextText, int totalQuestions, Long examId) {
+    public void generateQuestions(String contextText, int totalQuestions, Long examId,String userID) {
         try {
             String limitedContext = truncateContext(contextText, 2000);
 
@@ -59,7 +68,7 @@ public class QuestionService {
 
             if (questions != null && !questions.isEmpty()) {
 
-                // 1. Transform the AI DTOs into a list of nested QuestionData objects
+                //Transform the AI DTOs into a list of nested QuestionData objects
                 List<QuestionData> questionList = questions.stream()
                         .map(dto -> {
                             randomizeOptions(dto); // Randomize before mapping
@@ -72,16 +81,33 @@ public class QuestionService {
                         .collect(Collectors.toList());
 
 
-                // 2. Create ONE single document for the whole exam
+                //Create ONE single document for the whole exam
                 QuestionEntity examPaper = new QuestionEntity();
                 examPaper.setExamId(String.valueOf(examId));
                 examPaper.setQuestions(questionList);
                 String randomPassword = generateExamCode(6);
                 examPaper.setExamPassword(randomPassword); // Set the generated password
 
-                // 3. Save the single document to MongoDB
+                //Save the single document to MongoDB
                 questionRepository.save(examPaper);
                 timetableRepo.markAsGenerated(examId);
+
+                //for notification to university
+                ZonedDateTime istZone = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
+                LocalDateTime istLocal = istZone.toLocalDateTime();
+                String examName = timetableRepo.getExamNameByTimetable(examId);
+                // 1. Use the static builder() method directly
+                Notification notification = Notification.builder()
+                        .userId(userID)
+                        .role("university")
+                        .type("QUESTION_GENERATION_DONE")
+                        .msg("Questions generation process finished for " + examName)
+                        .isRead(false)
+                        .createdAt(istLocal)
+                        .build();
+                // 2. Save the result of the .build() call
+                notificationRepo.save(notification);
+
                 System.out.println("✅ Saved single document and password for Exam ID: " + examId + " with " + questionList.size() + " questions.");
             } else {
                 System.out.println(">>> AI returned an empty list.");

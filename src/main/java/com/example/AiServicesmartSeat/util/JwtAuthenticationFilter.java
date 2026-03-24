@@ -94,6 +94,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 //                return; // Stop here!
 //            }
 //        }
+        System.out.println("id = "+id+" role = "+role);
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(
                         id,

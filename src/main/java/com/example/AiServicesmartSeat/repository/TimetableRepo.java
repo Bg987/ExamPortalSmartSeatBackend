@@ -41,4 +41,12 @@ public interface TimetableRepo extends JpaRepository<Timetable, Long> {
                 @Param("collegeId") Long collegeId,
                 @Param("limit") java.time.LocalTime limit
         );
+
+    @Query("""
+        SELECT CONCAT(t.branch, ' - Sem ', t.semester, 
+              ' - ', t.subjectId, 
+              ' - ', t.examDate)
+           FROM Timetable t
+        WHERE t.id = :timeTableId""")
+    String getExamNameByTimetable(@Param("timeTableId") Long timeTableId);
 }
