@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -18,7 +19,7 @@ public class CollegeService {
     private final QuestionRepository questionRepository;
 
     public List<Map<String, Object>> getUpcomingExamsWithPasswords(Long collegeId) {
-        LocalTime now = LocalTime.now();
+        LocalTime now = LocalTime.now(ZoneId.of("Asia/Kolkata"));
         LocalTime limit = now.plusMinutes(30);
 
         List<Map<String, Object>> sqlResults = timetableRepo.findExamsWithin15MinWindow(collegeId, limit);
