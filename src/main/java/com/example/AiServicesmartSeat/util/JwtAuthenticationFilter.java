@@ -43,10 +43,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 2. PUBLIC PATH CHECK: Allow login without a JWT token
+        //ignore filter for special routes
         String path = request.getRequestURI();
-        if (path.contains("/Auth/") || path.contains("/public")) {
+        if (path.contains("/Auth/") || path.contains("/public")||path.contains("/api/exam/getExamPasswordOpen")) {
             filterChain.doFilter(request, response);
+            System.out.println("ignore");
             return; // Stop processing this filter, move to the next
         }
 
@@ -94,7 +95,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 //                return; // Stop here!
 //            }
 //        }
-        System.out.println("id = "+id+" role = "+role);
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(
                         id,

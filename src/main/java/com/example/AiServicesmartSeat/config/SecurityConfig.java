@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/Auth/**").permitAll() // Open to everyone
+                        .requestMatchers("/api/Auth/**","/api/exam/getExamPasswordOpen/**").permitAll() // Open to everyone
                         //.requestMatchers("/api/ai/questions/**").authenticated()
                         .anyRequest().authenticated()
                 )
@@ -61,8 +61,10 @@ public class SecurityConfig {
                 "http://localhost:4200",
                 "http://localhost:4201",
                 "https://smart-seat-frontend-three.vercel.app",
+                "http://localhost:8080",//for telegram chatbot server1 local url
+                "https://smartseatbackend.onrender.com",//same as above
                 "https://exam-portal-smart-seat-frontend.vercel.app",
-                "https://proxy-0xaq.onrender.com" // ADD YOUR PROXY HERE
+                "https://proxy-0xaq.onrender.com"
         ));
 
         // Add X-Requested-With and the SEB header to allowed headers
