@@ -66,7 +66,6 @@ public class SecurityConfig {
                 "https://exam-portal-smart-seat-frontend.vercel.app",
                 "https://proxy-0xaq.onrender.com"
         ));
-
         // Add X-Requested-With and the SEB header to allowed headers
         config.setAllowedHeaders(java.util.List.of(
                 "Origin",
