@@ -49,4 +49,11 @@ public interface TimetableRepo extends JpaRepository<Timetable, Long> {
            FROM Timetable t
         WHERE t.id = :timeTableId""")
     String getExamNameByTimetable(@Param("timeTableId") Long timeTableId);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE Timetable t SET t.completed = true WHERE t.id = :examId")
+    int markExamAsCompleted(@Param("examId") Long examId);
+
+    boolean existsByIdAndCompletedTrue(Long examId);
 }

@@ -54,6 +54,11 @@ public class ExamService {
         return true;
     }
 
+    public boolean checkCompletionStatus(Long examId) {
+        // If the exam exists, return its status; otherwise, assume not completed (false)
+        return timetableRepo.existsByIdAndCompletedTrue(examId);
+    }
+
     public StudentExamView verifyAndGetView(Long examId, String inputPassword) {
         String enrNumber = helper.getEnrNumberIdByUserId();
 

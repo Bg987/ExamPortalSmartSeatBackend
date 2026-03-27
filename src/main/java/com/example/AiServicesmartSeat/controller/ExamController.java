@@ -1,14 +1,18 @@
 package com.example.AiServicesmartSeat.controller;
 
+import com.example.AiServicesmartSeat.DTO.ExamReviewDTO;
 import com.example.AiServicesmartSeat.DTO.ExamSyncDTO;
 import com.example.AiServicesmartSeat.DTO.StudentExamView;
 import com.example.AiServicesmartSeat.entity.QuestionEntity;
 import com.example.AiServicesmartSeat.entity.Timetable;
 import com.example.AiServicesmartSeat.repository.QuestionRepository;
+import com.example.AiServicesmartSeat.repository.ResultRepository;
 import com.example.AiServicesmartSeat.repository.TimetableRepo;
 import com.example.AiServicesmartSeat.service.ExamService;
+import com.example.AiServicesmartSeat.service.GradingService;
 import com.example.AiServicesmartSeat.service.QuestionService;
 import com.example.AiServicesmartSeat.util.HelperMethod;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.apache.tika.Tika;
@@ -35,6 +39,8 @@ public class ExamController {
     private final TimetableRepo timetableRepo;
     private final HelperMethod helper;
     private final ExamService examService;
+    private final GradingService gradingService;
+    private final QuestionRepository examRepository;
     private final Tika tika = new Tika();
 
 
@@ -88,14 +94,14 @@ public class ExamController {
         return ResponseEntity.ok(res);
     }
 
-
+    //enter into exam
     @PreAuthorize("hasRole('student')")
     @PostMapping("/verify/{examId}")
     public ResponseEntity<?> enterExam(@PathVariable Long examId, @RequestBody Map<String, String> payload) {
         String password = payload.get("password");
         try {
 
-            //ensure access exam before 2 minute of start time
+            //ensure access exam before 2 minute of start time or before end time
             if(!examService.validateStudent(examId)){
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error","Access denied. You can only enter between 2 minutes before the start time and the scheduled end of the exam."));
             }
@@ -149,6 +155,36 @@ public class ExamController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("error", "Failed to finalize submission."));
         }
+    }
+
+    //calculate grades for exam
+    @PreAuthorize("hasRole('university')")
+    @PostMapping("/generate/{examId}")
+    public ResponseEntity<String> generateExamResults(@PathVariable String examId) {
+        // 1. Get the master paper
+        QuestionEntity exam = examRepository.findByExamId(examId)
+                .orElseThrow(() -> new RuntimeException("Exam Paper not found for ID: " + examId));
+
+        if(examService.checkCompletionStatus(Long.valueOf(examId))){
+            return ResponseEntity.ok("Grading process already done or running in background");
+        }
+        // 2. Start Async Grading
+        gradingService.gradeEntireExamAsync(exam,helper.getId());
+
+        return ResponseEntity.ok("Grading process started for Exam " + examId);
+    }
+
+    //access exam data like attempted question true/false marks for student
+    @PreAuthorize("hasRole('student')")
+    @GetMapping("/review/{examId}")
+    public ResponseEntity<ExamReviewDTO> getExamReview(
+            @PathVariable String examId,
+            HttpServletRequest request) {
+
+        String enrNumber = helper.getEnrNumberIdByUserId();
+
+        ExamReviewDTO review = gradingService.getDetailedReview(examId, enrNumber);
+        return ResponseEntity.ok(review);
     }
 
     @GetMapping("/health")

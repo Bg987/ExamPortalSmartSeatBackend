@@ -23,4 +23,6 @@ public interface StudentRepository extends JpaRepository<Students, String> {
     Optional<String> findEnrollmentNoByStudentId(@Param("studentId") Long studentId);
 
     Optional<Students> findByEnrollmentNo(String enrollmentNo);
+
+    List<Students> findAllByEnrollmentNoIn(List<String> enrollmentNos);
 }

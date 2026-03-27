@@ -47,7 +47,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         if (path.contains("/Auth/") || path.contains("/public")||path.contains("/api/exam/getExamPasswordOpen")) {
             filterChain.doFilter(request, response);
-            System.out.println("ignore");
             return; // Stop processing this filter, move to the next
         }
 

@@ -12,7 +12,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 })
 @EnableCaching
 
-
 public class AiServicesmartSeatApplication {
 
 	public static void main(String[] args) {
