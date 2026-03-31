@@ -37,6 +37,8 @@ public class HelperMethod {
                 .orElseThrow(() -> new RuntimeException("enr. number not found for student ID: " + studentId));
     }
 
+
+
     public String getId(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         // 2. Extract the Principal (which is "752" in your case)
