@@ -1,6 +1,7 @@
 package com.example.AiServicesmartSeat.repository;
 
 
+import com.example.AiServicesmartSeat.DTO.ExamDropdownDTO;
 import com.example.AiServicesmartSeat.entity.Timetable;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,7 +16,6 @@ public interface TimetableRepo extends JpaRepository<Timetable, Long> {
 
     @Modifying
     @Transactional
-    // We use the Java field name 'questionGenerated' here
     @Query("UPDATE Timetable t SET t.questionGenerated = true WHERE t.id = :id")
     int markAsGenerated(@Param("id") Long id);
 
@@ -56,4 +56,17 @@ public interface TimetableRepo extends JpaRepository<Timetable, Long> {
     int markExamAsCompleted(@Param("examId") Long examId);
 
     boolean existsByIdAndCompletedTrue(Long examId);
+
+    @Query("SELECT t.subjectId FROM Timetable t WHERE t.id = :id")
+    String findSubjectIdByTimetableId(@Param("id") Long id);
+
+    @Query("""
+    SELECT t.id AS id, 
+           CONCAT(t.branch, ' - Sem ', t.semester, 
+              ' - ', t.subjectId, 
+              ' - ', t.examDate) AS examName
+    FROM Timetable t
+    WHERE t.completed = true
+    """)
+    List<ExamDropdownDTO> findAllCompletedExams();
 }

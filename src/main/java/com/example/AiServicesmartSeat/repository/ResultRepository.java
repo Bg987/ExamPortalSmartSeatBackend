@@ -21,4 +21,10 @@ public interface ResultRepository extends MongoRepository<ResultEntity, String> 
 
     // Check if a result already exists to prevent duplicate grading
     boolean existsByEnrNumberAndExamId(String enrNumber, String examId);
+
+
+    //for analysis
+
+    // Filter results for specific students in a specific exam
+    List<ResultEntity> findByExamIdAndEnrNumberIn(String examId, List<String> enrNumbers);
 }

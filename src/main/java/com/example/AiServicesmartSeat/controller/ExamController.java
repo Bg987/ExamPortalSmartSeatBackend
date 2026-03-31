@@ -8,6 +8,7 @@ import com.example.AiServicesmartSeat.entity.Timetable;
 import com.example.AiServicesmartSeat.repository.QuestionRepository;
 import com.example.AiServicesmartSeat.repository.ResultRepository;
 import com.example.AiServicesmartSeat.repository.TimetableRepo;
+import com.example.AiServicesmartSeat.service.AnalyticsService;
 import com.example.AiServicesmartSeat.service.ExamService;
 import com.example.AiServicesmartSeat.service.GradingService;
 import com.example.AiServicesmartSeat.service.QuestionService;
@@ -170,8 +171,7 @@ public class ExamController {
         }
         // 2. Start Async Grading
         gradingService.gradeEntireExamAsync(exam,helper.getId());
-
-        return ResponseEntity.ok("Grading process started for Exam " + examId);
+        return ResponseEntity.ok("Grading and analytics process started for Exam " + examId);
     }
 
     //access exam data like attempted question true/false marks for student
@@ -186,6 +186,7 @@ public class ExamController {
         ExamReviewDTO review = gradingService.getDetailedReview(examId, enrNumber);
         return ResponseEntity.ok(review);
     }
+
 
     @GetMapping("/health")
     public ResponseEntity<?> health()

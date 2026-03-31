@@ -45,4 +45,22 @@ public interface SeatAllocationRepo extends JpaRepository<SeatAllocation, Long> 
             "AND s.timetable.id = :timetableId")
     int markAsSubmitted(@Param("enrNumber") String enrNumber,
                         @Param("timetableId") Long timetableId);
+
+
+    //for analysis
+    @Query("SELECT DISTINCT s.college.collegeId FROM SeatAllocation s WHERE s.timetable.id = :examId")
+    List<Long> findDistinctCollegeIdsByExamId(@Param("examId") Long examId);
+
+    // 2. Count registered: uses College (entity) + CollegeId (field)
+    int countByTimetableIdAndCollegeCollegeId(Long examId, Long collegeId);
+
+    // 3. Count present
+    int countByTimetableIdAndCollegeCollegeIdAndAttendanceTrue(Long examId, Long collegeId);
+
+    // 4. Count submitted
+    int countByTimetableIdAndCollegeCollegeIdAndIsSubmittedTrue(Long examId, Long collegeId);
+
+    // 5. Get enrollment numbers for filtering MongoDB results
+    @Query("SELECT s.student.enrollmentNo FROM SeatAllocation s WHERE s.timetable.id = :examId AND s.college.collegeId = :collegeId")
+    List<String> findEnrollmentNumbersByExamAndCollege(@Param("examId") Long examId, @Param("collegeId") Long collegeId);
 }

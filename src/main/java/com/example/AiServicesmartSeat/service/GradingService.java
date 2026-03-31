@@ -24,7 +24,7 @@ public class GradingService {
     private final StudentRepository studentRepository;
     private final TimetableRepo timetableRepo;
     private final QuestionRepository questionRepository;
-
+    private final AnalyticsService analyticsService;
 
     public CompletableFuture<String> gradeEntireExamAsync(QuestionEntity exam,String id) {
 
@@ -95,6 +95,7 @@ public class GradingService {
                     .isRead(false)
                     .build());
 
+            analyticsService.generateAnalyticsForExam(Long.valueOf(examId));
             notificationRepository.saveAll(notifications);
             return "Grading and Notifications synced for " + resultsToSave.size() + " students.";
         });
