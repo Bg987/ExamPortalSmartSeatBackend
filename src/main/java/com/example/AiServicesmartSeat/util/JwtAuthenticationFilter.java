@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         //ignore filter for special routes
         String path = request.getRequestURI();
-        if (path.contains("/Auth/") || path.contains("/public")||path.contains("/api/exam/getExamPasswordOpen")) {
+        if ((path.contains("/Auth/login")) || path.contains("/public")||path.contains("/api/exam/getExamPasswordOpen")) {
             filterChain.doFilter(request, response);
             return; // Stop processing this filter, move to the next
         }
@@ -78,22 +78,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String id = jwtUtil.extractId(token);
         String role = jwtUtil.extractRole(token);
 
-        //ensure stundents open exam portal in safe exam browser
-//        if(role.equals("student")){
-//            // 1. SEB CHECK: Every request must come from SEB
-//            String userAgent = request.getHeader("User-Agent");
-//            String requestConfigKey = request.getHeader("X-SafeExamBrowser-ConfigKeyhash");
-//            boolean isSeb = (userAgent != null && userAgent.contains("SEB"));
-//            boolean isKeyValid = (requestConfigKey != null && requestConfigKey.equals(SEB_CONFIG_KEY));
-//
-//            if (!isSeb || !isKeyValid) {
-//                authService.logout(response);
-//                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-//                response.setContentType("application/json");
-//                response.getWriter().write("{\"error\": \"Unauthorized: you logout Please use the official SeatWise SEB file and do face authentication again.\"}");
-//                return; // Stop here!
-//            }
-//        }
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(
                         id,

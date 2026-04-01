@@ -33,15 +33,13 @@ public class HelperMethod {
 
     public String getEnrNumberIdByUserId() {
         String studentId = getId();
+        System.out.println(studentId);
         return stuRepo.findEnrollmentNoByStudentId(Long.parseLong(studentId)) // Or the method we fixed earlier
                 .orElseThrow(() -> new RuntimeException("enr. number not found for student ID: " + studentId));
     }
 
-
-
     public String getId(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        // 2. Extract the Principal (which is "752" in your case)
         return auth.getPrincipal().toString();
     }
 
