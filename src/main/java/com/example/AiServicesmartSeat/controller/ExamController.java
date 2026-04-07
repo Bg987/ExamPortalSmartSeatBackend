@@ -89,7 +89,6 @@ public class ExamController {
         }
     }
 
-    @PreAuthorize("hasRole('student')")
     @GetMapping("/test")
     public String test(){
         return "protected for studnet";
@@ -139,6 +138,7 @@ public class ExamController {
         }
     }
 
+    @PreAuthorize("hasRole('student')")
     @PostMapping("/sync")
     public ResponseEntity<?> sync(@RequestBody ExamSyncDTO dto) {
         // 1. Get enrNumber from Session/SecurityContext

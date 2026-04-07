@@ -1,7 +1,6 @@
 package com.example.AiServicesmartSeat.config;
 
 import com.example.AiServicesmartSeat.util.JwtAuthenticationFilter;
-import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,76 +11,91 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import java.util.Arrays;
-import java.util.Collections;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+import com.example.AiServicesmartSeat.util.ForbiddenHandler;
 
 @Configuration
+@EnableWebSecurity // CRITICAL: This enables the security chain
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final forbiddenHandler myForbiddenHandler;
+    private final ForbiddenHandler myForbiddenHandler; // Ensure the class name starts with Uppercase
     private final JwtAuthenticationFilter jFiler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-
-                .headers(headers -> headers
-                        .frameOptions(frame -> frame.disable()) // Typical for proxies
-                )
-                .csrf(csrf -> csrf.disable()) // Disable CSRF for JWT
-                // Link directly to the bean defined below
+                // 1. CORS Configuration
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
+                // 2. CSRF & Frame Options (Disabled for APIs and H2/Proxies)
+                .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+
+                // 3. Stateless Session (JWT)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+                // 4. Request Authorization
                 .authorizeHttpRequests(auth -> auth
-
+                        // Allow all Pre-flight (OPTIONS) requests
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/Auth/**","/api/exam/getExamPasswordOpen/**").permitAll() // Open to everyone
-                        //.requestMatchers("/api/ai/questions/**").authenticated()
+
+                        // Public Endpoints
+                        .requestMatchers("/api/Auth/**", "/api/exam/getExamPasswordOpen/**").permitAll()
+
+                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
 
-                .addFilterBefore(jFiler, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exception -> exception.accessDeniedHandler(myForbiddenHandler));
+                // 5. Exception Handling
+                .exceptionHandling(exception -> exception.accessDeniedHandler(myForbiddenHandler))
+
+                // 6. Add Custom Filter BEFORE the standard Auth filter
+                .addFilterBefore(jFiler, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
-    public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
 
         config.setAllowCredentials(true);
 
-        config.setAllowedOrigins(java.util.List.of(
+        // Allowed Origins
+        config.setAllowedOrigins(List.of(
                 "http://localhost:4200",
                 "http://localhost:4201",
+                "http://localhost:8081",
                 "https://smart-seat-frontend-three.vercel.app",
-                "http://localhost:8080",//for telegram chatbot server1 local url
-                "https://smartseatbackend.onrender.com",//same as above
                 "https://exam-portal-smart-seat-frontend.vercel.app",
-                "https://proxy-0xaq.onrender.com"
+                "https://proxy-0xaq.onrender.com",
+                "https://smartseatbackend.onrender.com"
         ));
-        // Add X-Requested-With and the SEB header to allowed headers
-        config.setAllowedHeaders(java.util.List.of(
+
+        // Allowed Headers (Including SEB specific ones)
+        config.setAllowedHeaders(List.of(
                 "Origin",
                 "Content-Type",
                 "Accept",
                 "Authorization",
                 "X-Requested-With",
-                "X-SafeExamBrowser-ConfigKeyhash"
+                "User-Agent",
+                "X-SafeExamBrowser-ConfigKeyhash",
+                "X-SafeExamBrowser-ConfigKeyHash"
         ));
 
-        config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        // Allowed Methods
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-        // Ensure the browser can see these headers in the response
-        config.setExposedHeaders(java.util.List.of("Set-Cookie", "Authorization"));
+        // Headers exposed to the browser/Angular
+        config.setExposedHeaders(List.of("Set-Cookie", "Authorization", "X-SafeExamBrowser-ConfigKeyHash"));
 
-        org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }

@@ -36,7 +36,6 @@ public class AuthenticationController {
                                              @RequestParam("image") MultipartFile image,
                                              HttpServletResponse res,
                                              Authentication authentication) {
-
         try {
             String blockMessage = authService.checkBlockStatus(enrollmentNumber);
 
@@ -60,7 +59,9 @@ public class AuthenticationController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestBody LogoutRequest request, HttpServletResponse response){
 
+        System.out.println(request.getIsViolation()+"hdsvjhdbvhbfdvhfvj");
         if (Boolean.TRUE.equals(request.getIsViolation())) {
+            System.out.println("calllldssddvd");
             String enrNumber = helper.getEnrNumberIdByUserId();
             BlockSession block = new BlockSession(enrNumber, ZonedDateTime.now(IST_ZONE).toLocalDateTime());
             blockSessionRepository.save(block);
