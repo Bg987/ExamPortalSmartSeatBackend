@@ -77,7 +77,7 @@ public class SecurityConfig {
                 "https://smartseatbackend.onrender.com"
         ));
 
-        // Allowed Headers (Including SEB specific ones)
+        // Allowed Headers (Including ALL SEB specific headers)
         config.setAllowedHeaders(List.of(
                 "Origin",
                 "Content-Type",
@@ -85,15 +85,27 @@ public class SecurityConfig {
                 "Authorization",
                 "X-Requested-With",
                 "User-Agent",
-                "X-SafeExamBrowser-ConfigKeyhash",
-                "X-SafeExamBrowser-ConfigKeyHash"
+                "X-SafeExamBrowser-ConfigKeyHash",
+                "X-SafeExamBrowser-RequestHash",
+                "X-SafeExamBrowser-BrowserExamKey",
+                "Cache-Control",
+                "Pragma"
         ));
 
         // Allowed Methods
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-        // Headers exposed to the browser/Angular
-        config.setExposedHeaders(List.of("Set-Cookie", "Authorization", "X-SafeExamBrowser-ConfigKeyHash"));
+        // Headers exposed to the browser/client (Important for SEB validation)
+        config.setExposedHeaders(List.of(
+                "Set-Cookie",
+                "Authorization",
+                "X-SafeExamBrowser-ConfigKeyHash",
+                "X-SafeExamBrowser-RequestHash",
+                "X-SafeExamBrowser-BrowserExamKey"
+        ));
+
+        // Apply preflight cache duration
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
