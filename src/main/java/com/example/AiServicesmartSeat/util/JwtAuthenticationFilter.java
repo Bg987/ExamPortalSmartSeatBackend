@@ -77,6 +77,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         boolean isExamPath = examPaths.stream().anyMatch(path::contains);
 
         if ("student".equalsIgnoreCase(role) && isExamPath) {
+            System.out.println("--- All Incoming Headers ---");
+            java.util.Enumeration<String> names = request.getHeaderNames();
+            while (names.hasMoreElements()) {
+                String name = names.nextElement();
+                System.out.println(name + ": " + request.getHeader(name));
+            }
             String userAgent = request.getHeader("User-Agent");
             // Check both cases (SEB 3.0 uses 'H')
             String requestKey = request.getHeader("X-SafeExamBrowser-ConfigKeyhash");
