@@ -6,9 +6,7 @@ import com.example.AiServicesmartSeat.DTO.StudentExamView;
 import com.example.AiServicesmartSeat.entity.QuestionEntity;
 import com.example.AiServicesmartSeat.entity.Timetable;
 import com.example.AiServicesmartSeat.repository.QuestionRepository;
-import com.example.AiServicesmartSeat.repository.ResultRepository;
 import com.example.AiServicesmartSeat.repository.TimetableRepo;
-import com.example.AiServicesmartSeat.service.AnalyticsService;
 import com.example.AiServicesmartSeat.service.ExamService;
 import com.example.AiServicesmartSeat.service.GradingService;
 import com.example.AiServicesmartSeat.service.QuestionService;
@@ -45,6 +43,20 @@ public class ExamController {
     private final Tika tika = new Tika();
 
 
+
+    //manual/csv question insertion
+    @PostMapping("/manual-insert")
+    public ResponseEntity<String> saveManualPaper(@RequestBody QuestionEntity payload) {
+        try {
+            questionService.saveAndFinalizePaper(payload);
+            return ResponseEntity.ok("Exam paper finalized and published successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Failed to save paper: " + e.getMessage());
+        }
+    }
+
+    //ai generated qurstion from document
     @PreAuthorize("hasRole('university')")
     @PostMapping("/generate-from-pdf")
     public ResponseEntity<?> generateFromPdf(
@@ -172,6 +184,35 @@ public class ExamController {
         // 2. Start Async Grading
         gradingService.gradeEntireExamAsync(exam,helper.getId());
         return ResponseEntity.ok("Grading and analytics process started for Exam " + examId);
+    }
+
+    //fetch question list for approval for exam
+    @PreAuthorize("hasRole('university')")
+    @GetMapping("/questions/{examId}")
+    public ResponseEntity<QuestionEntity> getQuestionsForReview(@PathVariable String examId) {
+
+        return examRepository.findByExamId(examId)
+                .map(exam -> {
+                    // Hide the password before sending to the frontend for review
+                    exam.setExamPassword(null);
+                    return ResponseEntity.ok(exam);
+                })
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @PreAuthorize("hasRole('university')")
+    @PutMapping("/approve/{examId}")
+    public ResponseEntity<String> approveExam(
+            @PathVariable String examId,
+            @RequestBody QuestionEntity updatedPaper) {
+
+        try {
+            questionService.approveAndSavePaper(examId, updatedPaper);
+            return ResponseEntity.ok("Exam paper approved and changes synchronized successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Failed to approve exam: " + e.getMessage());
+        }
     }
 
     //access exam data like attempted question true/false marks for student

@@ -9,10 +9,7 @@ import java.util.Optional;
 @Repository
 public interface QuestionRepository extends MongoRepository<QuestionEntity, String> {
 
-    /**
-     * Custom query method: Spring Data will automatically implement this
-     * to find all questions matching a specific examId.
-     */
+
     Optional<QuestionEntity> findByExamId(String examId);
     Boolean existsByExamId(String examId);
     /**

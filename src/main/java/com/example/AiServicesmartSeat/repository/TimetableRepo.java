@@ -14,10 +14,18 @@ import java.util.Map;
 
 public interface TimetableRepo extends JpaRepository<Timetable, Long> {
 
+    //for AI gen. question
     @Modifying
     @Transactional
     @Query("UPDATE Timetable t SET t.questionGenerated = true WHERE t.id = :id")
     int markAsGenerated(@Param("id") Long id);
+
+
+    //for manually inserted question
+    @Modifying
+    @Transactional
+    @Query("UPDATE Timetable t SET t.questionGenerated = true, t.approved = true WHERE t.id = :id")
+    int markAsGeneratedAndApproved(@Param("id") Long id);
 
     @Query("SELECT t.questionGenerated FROM Timetable t WHERE t.id = :id")
     Boolean isQuestionGenerated(@Param("id") Long id);
@@ -60,6 +68,7 @@ public interface TimetableRepo extends JpaRepository<Timetable, Long> {
     @Query("SELECT t.subjectId FROM Timetable t WHERE t.id = :id")
     String findSubjectIdByTimetableId(@Param("id") Long id);
 
+
     @Query("""
     SELECT t.id AS id, 
            CONCAT(t.branch, ' - Sem ', t.semester, 
@@ -69,4 +78,16 @@ public interface TimetableRepo extends JpaRepository<Timetable, Long> {
     WHERE t.completed = true
     """)
     List<ExamDropdownDTO> findAllCompletedExams();
+
+    //fetch exam whose question approval not done
+    @Query("""
+    SELECT t.id AS id, 
+           CONCAT(t.branch, ' - Sem ', t.semester, 
+              ' - ', t.subjectId, 
+              ' - ', t.examDate) AS examName
+    FROM Timetable t
+    WHERE t.approved = false AND
+        t.questionGenerated = true
+    """)
+    List<ExamDropdownDTO> findExam();
 }

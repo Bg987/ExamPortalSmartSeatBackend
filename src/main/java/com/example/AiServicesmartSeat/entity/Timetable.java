@@ -56,8 +56,12 @@ public class Timetable {
     @Column(name = "is_question_genrated", nullable = false)
     private boolean questionGenerated = false;
 
-    public boolean isAccessAllowed() {
+    @Column(name = "is_approved", nullable = false)
+    private boolean approved = false; // The new approval flag of AI generated question
 
+
+    public boolean isAccessAllowed() {
+        if (!approved) return false; // If not approved, no one gets in
 
         // for deployment and local
         LocalDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).toLocalDateTime();

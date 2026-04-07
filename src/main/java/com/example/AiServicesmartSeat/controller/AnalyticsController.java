@@ -6,6 +6,7 @@ import com.example.AiServicesmartSeat.entity.ExamAnalytics;
 import com.example.AiServicesmartSeat.repository.ExamAnalyticsRepository;
 import com.example.AiServicesmartSeat.repository.TimetableRepo;
 import com.example.AiServicesmartSeat.service.AnalyticsService;
+import com.example.AiServicesmartSeat.service.QuestionService;
 import com.example.AiServicesmartSeat.util.HelperMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,21 @@ public class AnalyticsController {
     private final ExamAnalyticsRepository analyticsRepo;
     private final AnalyticsService analyticsService;
     private final HelperMethod helper;
+    private final QuestionService questionService;
 
 
+    //fetch exams whose question approval not done
+    @PreAuthorize("hasRole('university')")
+    @GetMapping("/getExam")
+    public ResponseEntity<List<ExamDropdownDTO>> getExam() {
+        List<ExamDropdownDTO> exams = questionService.getExamList();
+
+        if (exams.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(exams);
+    }
 
     @PreAuthorize("hasRole('university')")
     @GetMapping("/completed")
