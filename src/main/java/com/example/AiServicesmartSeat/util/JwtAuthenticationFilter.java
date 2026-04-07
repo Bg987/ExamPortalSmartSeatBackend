@@ -91,7 +91,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // MANUALLY ADD CORS HEADERS (Crucial for Angular to read the error)
                 origin = request.getHeader("Origin");
-                response.setHeader("Access-Control-Allow-Origin", origin != null ? origin : "http://localhost:4201");
+                response.setHeader("Access-Control-Allow-Origin", origin != null ? origin : "https://exam-portal-smart-seat-frontend.vercel.app/");
                 response.setHeader("Access-Control-Allow-Credentials", "true");
 
                 sendErrorResponse(response, "Please use the official SeatWise SEB file and re-verify face.", 403);
