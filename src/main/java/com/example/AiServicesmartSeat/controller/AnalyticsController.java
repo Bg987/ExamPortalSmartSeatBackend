@@ -41,6 +41,7 @@ public class AnalyticsController {
         return ResponseEntity.ok(exams);
     }
 
+
     @PreAuthorize("hasRole('university')")
     @GetMapping("/completed")
     public ResponseEntity<List<ExamDropdownDTO>> getCompletedExams() {

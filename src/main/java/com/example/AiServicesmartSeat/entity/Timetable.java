@@ -68,7 +68,6 @@ public class Timetable {
 
         // The Exam Start Time (Expected to be in IST)
         LocalDateTime examStart = LocalDateTime.of(this.examDate, this.startTime);
-
         // --- ACCESS LOGIC ---
         // Allowed from 2 minutes before start until the end of the duration
         boolean afterStartBuffer = now.isAfter(examStart.minusMinutes(2));

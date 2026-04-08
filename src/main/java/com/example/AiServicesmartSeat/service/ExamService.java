@@ -1,6 +1,5 @@
 package com.example.AiServicesmartSeat.service;
 
-
 import com.example.AiServicesmartSeat.DTO.ExamSyncDTO;
 import com.example.AiServicesmartSeat.DTO.StudentExamView;
 import com.example.AiServicesmartSeat.entity.QuestionEntity;
