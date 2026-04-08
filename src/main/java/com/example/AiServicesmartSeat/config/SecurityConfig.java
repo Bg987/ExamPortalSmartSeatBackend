@@ -73,8 +73,7 @@ public class SecurityConfig {
                 "http://localhost:8081",
                 "https://smart-seat-frontend-three.vercel.app",
                 "https://exam-portal-smart-seat-frontend.vercel.app",
-                "https://proxy-0xaq.onrender.com",
-                "https://smartseatbackend.onrender.com"
+                "https://proxy-0xaq.onrender.com"
         ));
 
         // Allowed Headers (Including ALL SEB specific headers)

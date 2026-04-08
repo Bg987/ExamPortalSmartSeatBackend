@@ -86,15 +86,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String userAgent = request.getHeader("User-Agent");
             // Check both cases (SEB 3.0 uses 'H')
             String requestKey = request.getHeader("X-SafeExamBrowser-ConfigKeyhash");
-            if (requestKey == null) requestKey = request.getHeader("X-SafeExamBrowser-ConfigKeyHash");
+
 
             boolean isSeb = (userAgent != null && userAgent.contains("SEB"));
             boolean isKeyValid = (sebConfigKey != null && sebConfigKey.equals(requestKey));
 
-            System.out.println("from UI req key = "+requestKey);
-            System.out.println("isseb = "+isSeb);
-            System.out.println("isvalid = "+isKeyValid);
-            System.out.println("key in server = "+sebConfigKey);
+
             if (!isSeb || !isKeyValid) {
                 // Perform Server-side Logout
                 authService.logout(response);

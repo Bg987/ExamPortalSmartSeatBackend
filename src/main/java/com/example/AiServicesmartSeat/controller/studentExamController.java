@@ -34,10 +34,10 @@ public class studentExamController {
 
         //fetch exams which is incomplete
         List<Map<String, Object>> examNameAndId= stuService.getExamList(enrNumber,false);
-        if(examNameAndId.isEmpty()){
+        if (examNameAndId.isEmpty()) {
             return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body("No incomplete exams found for you.");
+                    .noContent() // Sets status to 204
+                    .build();    // No body allowed
         }
 
         Map<String, Object> response = new HashMap<>();
