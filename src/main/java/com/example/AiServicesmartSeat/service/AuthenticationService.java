@@ -113,7 +113,7 @@ public class AuthenticationService {
                 LocalDateTime unlockTime = blockedAt.plusMinutes(45);
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
 
-                return "Your account has been temporarily locked due to a proctoring violation. A mandatory 45-minute cooldown is in effect. You will be eligible to log in at " + unlockTime.format(formatter) + " (IST).kindly close this tab";
+                return "Your account has been temporarily locked due to a proctoring violation. A mandatory 45-minute cooldown is in effect. You will be eligible to log in at " + unlockTime.format(formatter) + " (IST).kindly close safe exam browser";
             } else {
                 // Penalty time is over, remove from DB
                 blockSessionRepository.deleteByEnrNumber(enrollmentNumber);
