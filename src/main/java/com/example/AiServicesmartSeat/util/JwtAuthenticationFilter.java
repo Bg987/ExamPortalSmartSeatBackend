@@ -72,39 +72,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String id = jwtUtil.extractId(token);
         String role = jwtUtil.extractRole(token);
 
-        // 4. SEB CHECK: Apply ONLY to Student Role on Exam-Specific Endpoints
-//        List<String> examPaths = List.of("/api/exam/verify", "/api/exam/sync", "/api/ExamStudent/getStudentIncomplteExam");
-//        boolean isExamPath = examPaths.stream().anyMatch(path::contains);
-//
-//        if ("student".equalsIgnoreCase(role) && isExamPath) {
-//            System.out.println("--- All Incoming Headers ---");
-//            java.util.Enumeration<String> names = request.getHeaderNames();
-//            while (names.hasMoreElements()) {
-//                String name = names.nextElement();
-//                System.out.println(name + ": " + request.getHeader(name));
-//            }
-//            String userAgent = request.getHeader("User-Agent");
-//            // Check both cases (SEB 3.0 uses 'H')
-//            String requestKey = request.getHeader("X-SafeExamBrowser-ConfigKeyhash");
-//
-//
-//            boolean isSeb = (userAgent != null && userAgent.contains("SEB"));
-//            boolean isKeyValid = (sebConfigKey != null && sebConfigKey.equals(requestKey));
-//
-//
-//            if (!isSeb || !isKeyValid) {
-//                // Perform Server-side Logout
-//                authService.logout(response);
-//
-//                // MANUALLY ADD CORS HEADERS (Crucial for Angular to read the error)
-//                origin = request.getHeader("Origin");
-//                response.setHeader("Access-Control-Allow-Origin", origin != null ? origin : "https://exam-portal-smart-seat-frontend.vercel.app/");
-//                response.setHeader("Access-Control-Allow-Credentials", "true");
-//
-//                sendErrorResponse(response, "Please use the official SeatWise SEB file and re-verify face.", 403);
-//                return;
-//            }
-//        }
+         4. SEB CHECK: Apply ONLY to Student Role on Exam-Specific Endpoints
+        List<String> examPaths = List.of("/api/exam/verify", "/api/exam/sync", "/api/ExamStudent/getStudentIncomplteExam");
+        boolean isExamPath = examPaths.stream().anyMatch(path::contains);
+
+        if ("student".equalsIgnoreCase(role) && isExamPath) {
+            System.out.println("--- All Incoming Headers ---");
+            java.util.Enumeration<String> names = request.getHeaderNames();
+            while (names.hasMoreElements()) {
+                String name = names.nextElement();
+                System.out.println(name + ": " + request.getHeader(name));
+            }
+            String userAgent = request.getHeader("User-Agent");
+            // Check both cases (SEB 3.0 uses 'H')
+            String requestKey = request.getHeader("X-SafeExamBrowser-ConfigKeyhash");
+
+
+            boolean isSeb = (userAgent != null && userAgent.contains("SEB"));
+            boolean isKeyValid = (sebConfigKey != null && sebConfigKey.equals(requestKey));
+
+
+            if (!isSeb || !isKeyValid) {
+                // Perform Server-side Logout
+                authService.logout(response);
+
+                // MANUALLY ADD CORS HEADERS (Crucial for Angular to read the error)
+                origin = request.getHeader("Origin");
+                response.setHeader("Access-Control-Allow-Origin", origin != null ? origin : "https://exam-portal-smart-seat-frontend.vercel.app/");
+                response.setHeader("Access-Control-Allow-Credentials", "true");
+
+                sendErrorResponse(response, "Please use the official SeatWise SEB file and re-verify face.", 403);
+                return;
+            }
+        }
 
         // 5. SET SECURITY CONTEXT
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
