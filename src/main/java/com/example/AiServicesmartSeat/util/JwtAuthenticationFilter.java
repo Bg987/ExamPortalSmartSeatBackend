@@ -72,7 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String id = jwtUtil.extractId(token);
         String role = jwtUtil.extractRole(token);
 
-         4. SEB CHECK: Apply ONLY to Student Role on Exam-Specific Endpoints
+         //4. SEB CHECK: Apply ONLY to Student Role on Exam-Specific Endpoints
         List<String> examPaths = List.of("/api/exam/verify", "/api/exam/sync", "/api/ExamStudent/getStudentIncomplteExam");
         boolean isExamPath = examPaths.stream().anyMatch(path::contains);
 
