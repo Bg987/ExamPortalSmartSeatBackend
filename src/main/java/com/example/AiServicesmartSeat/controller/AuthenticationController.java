@@ -31,6 +31,11 @@ public class AuthenticationController {
     private final BlockSessionRepository blockSessionRepository;
     private final ZoneId IST_ZONE = ZoneId.of("Asia/Kolkata");//for deployment
 
+
+    @GetMapping("/ping")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("pong");
+    }
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> login(@RequestParam("enrollmentNumber") String enrollmentNumber,
                                              @RequestParam("image") MultipartFile image,
