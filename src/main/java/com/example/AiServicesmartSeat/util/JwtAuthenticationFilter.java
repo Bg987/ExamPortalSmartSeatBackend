@@ -52,6 +52,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (path.contains("/public") ||
                 path.contains("/api/exam/getExamPasswordOpen") ||
                 path.startsWith("/api/Auth")) {
+            //check SEB at the time of login
+            if(path.endsWith("/api/Auth/login")){
+                if (isSebValidationFailed(request, response)) {
+                    return; // Stop the filter chain here
+                }
+            }
             filterChain.doFilter(request, response);
             return;
         }
@@ -77,28 +83,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
          //4. SEB CHECK: Apply ONLY to Student Role on Exam-Specific Endpoints
         List<String> examPaths = List.of("/api/exam/verify", "/api/exam/sync", "/api/ExamStudent/getStudentIncomplteExam");
         boolean isExamPath = examPaths.stream().anyMatch(path::contains);
+        String requestURI = request.getRequestURI();
 
+        System.out.println("kjdjgnnj "+requestURI.endsWith("/api/Auth/login"));
         if ("student".equalsIgnoreCase(role) && isExamPath) {
-            String userAgent = request.getHeader("User-Agent");
-            // Check both cases (SEB 3.0 uses 'H')
-            String requestKey = request.getHeader("X-SafeExamBrowser-ConfigKeyhash");
 
-
-            boolean isSeb = (userAgent != null && userAgent.contains("SEB"));
-            boolean isKeyValid = (sebConfigKey != null && sebConfigKey.equals(requestKey));
-
-
-            if (!isSeb || !isKeyValid) {
-                // Perform Server-side Logout
-                authService.logout(response);
-
-                // MANUALLY ADD CORS HEADERS (Crucial for Angular to read the error)
-                origin = request.getHeader("Origin");
-                response.setHeader("Access-Control-Allow-Origin", origin != null ? origin : "https://exam-portal-smart-seat-frontend.vercel.app/");
-                response.setHeader("Access-Control-Allow-Credentials", "true");
-
-                sendErrorResponse(response, "Please use the official SeatWise SEB file and re-verify face.", 403);
-                return;
+            if (isSebValidationFailed(request, response)) {
+                return; // Stop the filter chain here
             }
         }
 
@@ -109,6 +100,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isSebValidationFailed(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String userAgent = request.getHeader("User-Agent");
+        String requestKey = request.getHeader("X-SafeExamBrowser-ConfigKeyhash");
+
+        boolean isSeb = (userAgent != null && userAgent.contains("SEB"));
+        boolean isKeyValid = (sebConfigKey != null && sebConfigKey.equals(requestKey));
+
+        if (!isSeb || !isKeyValid) {
+            // Perform Server-side Logout
+            authService.logout(response);
+
+            // MANUALLY ADD CORS HEADERS
+            String origin = request.getHeader("Origin");
+            response.setHeader("Access-Control-Allow-Origin", origin != null ? origin : "https://exam-portal-smart-seat-frontend.vercel.app/");
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+
+            sendErrorResponse(response, "Please use the official SeatWise SEB file and re-verify face.", 403);
+            return true; // Yes, validation failed
+        }
+
+        return false; // No, validation passed
     }
 
     private void sendErrorResponse(HttpServletResponse response, String message, int status) throws IOException {
