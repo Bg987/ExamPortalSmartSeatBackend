@@ -49,7 +49,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         // 2. PUBLIC ROUTES: Skip filter for Login and specific Open APIs
-        if ((path.equals("/api/Auth/login")) || path.contains("/public") || path.contains("/api/exam/getExamPasswordOpen")) {
+        if (path.contains("/public") ||
+                path.contains("/api/exam/getExamPasswordOpen") ||
+                path.startsWith("/api/Auth")) {
             filterChain.doFilter(request, response);
             return;
         }
