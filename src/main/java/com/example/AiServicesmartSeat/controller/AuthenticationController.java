@@ -64,9 +64,7 @@ public class AuthenticationController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestBody LogoutRequest request, HttpServletResponse response){
 
-
         if (Boolean.TRUE.equals(request.getIsViolation())) {
-
 
             String enrNumber = helper.getEnrNumberIdByUserId();
             BlockSession block = new BlockSession(enrNumber, ZonedDateTime.now(IST_ZONE).toLocalDateTime());

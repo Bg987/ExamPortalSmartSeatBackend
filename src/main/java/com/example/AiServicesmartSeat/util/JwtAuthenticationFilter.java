@@ -51,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 2. PUBLIC ROUTES: Skip filter for Login and specific Open APIs
         if (path.contains("/public") ||
                 path.contains("/api/exam/getExamPasswordOpen") ||
-                path.startsWith("/api/Auth")) {
+                path.startsWith("/api/Auth/login")) {
             //check SEB at the time of login
             if(path.endsWith("/api/Auth/login")){
                 if (isSebValidationFailed(request, response)) {
