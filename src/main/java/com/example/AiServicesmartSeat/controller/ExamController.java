@@ -89,6 +89,20 @@ public class ExamController {
         }
     }
 
+    @PreAuthorize("hasRole('university')")
+    @GetMapping("/generate-ai-draft/{semester}")
+    public ResponseEntity<String> getAiDraft(
+            @PathVariable Integer semester,
+            @RequestParam String startDate,  // Example: "2026-05-10"
+            @RequestParam String startTime) { // Example: "10:30"
+        try {
+            String jsonDraft = examService.generateSemesterDraft(semester, startDate, startTime);
+            return ResponseEntity.ok(jsonDraft);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/test")
     public String test(){
         return "protected for studnet";

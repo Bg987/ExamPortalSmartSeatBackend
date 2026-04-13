@@ -4,12 +4,15 @@ import com.example.AiServicesmartSeat.DTO.ExamSyncDTO;
 import com.example.AiServicesmartSeat.DTO.StudentExamView;
 import com.example.AiServicesmartSeat.entity.QuestionEntity;
 import com.example.AiServicesmartSeat.entity.SeatAllocation;
+import com.example.AiServicesmartSeat.entity.Subject;
 import com.example.AiServicesmartSeat.entity.Timetable;
 import com.example.AiServicesmartSeat.repository.QuestionRepository;
 import com.example.AiServicesmartSeat.repository.SeatAllocationRepo;
+import com.example.AiServicesmartSeat.repository.SubjectRepository;
 import com.example.AiServicesmartSeat.repository.TimetableRepo;
 import com.example.AiServicesmartSeat.util.HelperMethod;
 import lombok.RequiredArgsConstructor;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -19,6 +22,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -33,8 +37,9 @@ public class ExamService {
     private final QuestionRepository questionRepo;
     private final SeatAllocationRepo seatRepo;
     private final HelperMethod helper;
+    private final SubjectRepository subRepo;
+    private final ChatClient chatClient;
     private final MongoTemplate mongoTemplate;
-
 
     public Boolean validateStudent(Long examId) {
         String enrNumber = helper.getEnrNumberIdByUserId();
@@ -121,5 +126,58 @@ public class ExamService {
         }
         // Optional: Log for your own debugging
         System.out.println("Async Sync Complete for: " + enrNumber);
+    }
+
+    public String generateSemesterDraft(Integer semester, String startDate, String startTime) {
+        List<Subject> subjects = subRepo.findBySemester(semester);
+
+        StringBuilder dataList = new StringBuilder();
+        for (Subject s : subjects) {
+            dataList.append(String.format("- ID: %s, Name: %s, BRANCH: %s\n",
+                    s.getSubjectId(), s.getSubjectName(), s.getBranch()));
+        }
+
+        String prompt = String.format("""
+        Act as an University Exam Scheduler for Semester %d.
+        
+        UNIVERSITY CONSTRAINTS:
+        - Exam Period Starts On: %s
+        - Standard Start Time: %s
+        - Duration: 180 minutes
+        
+        SUBJECTS TO ALLOCATE:
+        %s
+        
+        STRICT SCHEDULING RULES:
+        1. All subjects with the same 'subjectId' MUST be scheduled on the same 'examDate' and 'startTime'.
+        2. Every branch must have a 1-day gap (e.g., if Computer Branch has an exam on 2026-06-10, its next exam must be 2026-06-12 or later).
+        3. You must use the 'examDate' format YYYY-MM-DD.
+        4. The 'startTime' must be exactly '%s' (Format HH:mm).
+        5. The 'duration' must be exactly 180.
+        
+        OUTPUT INSTRUCTIONS:
+        Output ONLY a valid raw JSON array of objects. Do not include markdown formatting or extra text.
+        
+        REQUIRED JSON STRUCTURE:
+        [
+          {
+            "subjectId": "String",
+            "subjectName": "String",
+            "branch": "String",
+            "semester": %d,
+            "examDate": "YYYY-MM-DD",
+            "startTime": "HH:mm",
+            "duration": 180
+          }
+        ]
+        """, semester, startDate, startTime, dataList.toString(), startTime, semester);
+
+        return chatClient.prompt()
+                .user(prompt)
+                .call()
+                .content()
+                .replace("```json", "")
+                .replace("```", "")
+                .trim();
     }
 }

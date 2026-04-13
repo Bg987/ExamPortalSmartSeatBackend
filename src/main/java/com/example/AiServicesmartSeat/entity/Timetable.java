@@ -36,7 +36,7 @@ public class Timetable {
     private LocalTime startTime = LocalTime.of(9, 0); // Default 09:00 AM
 
     @Column(name="completed")
-    private boolean completed;
+    private boolean completed=false;
 
     @Column(name="batchid")
     private String batchId;
@@ -58,6 +58,7 @@ public class Timetable {
 
     @Column(name = "is_approved", nullable = false)
     private boolean approved = false; // The new approval flag of AI generated question
+
 
 
     public boolean isAccessAllowed() {
