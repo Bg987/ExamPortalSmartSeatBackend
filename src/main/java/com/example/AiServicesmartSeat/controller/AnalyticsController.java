@@ -68,7 +68,7 @@ public class AnalyticsController {
     @PostMapping(value = {"/getAnalyticsCollege/{examId}", "/getAnalyticsCollege/{examId}/{collegeID}"})
     public ResponseEntity<?> getAnalyticsCollege(
             @PathVariable Long examId,
-            @PathVariable(required = false) Long collegeID) {
+            @PathVariable(required = false) Long collegeID) throws Exception {
 
         Long finalCollegeId;
 

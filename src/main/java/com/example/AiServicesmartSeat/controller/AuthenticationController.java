@@ -62,7 +62,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestBody LogoutRequest request, HttpServletResponse response){
+    public ResponseEntity<String> logout(@RequestBody LogoutRequest request, HttpServletResponse response) throws Exception {
 
         if (Boolean.TRUE.equals(request.getIsViolation())) {
 

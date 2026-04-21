@@ -41,7 +41,7 @@ public class ExamService {
     private final ChatClient chatClient;
     private final MongoTemplate mongoTemplate;
 
-    public Boolean validateStudent(Long examId) {
+    public Boolean validateStudent(Long examId) throws Exception {
         String enrNumber = helper.getEnrNumberIdByUserId();
 
         // Check if student is even allocated to this exam
@@ -63,7 +63,7 @@ public class ExamService {
         return timetableRepo.existsByIdAndCompletedTrue(examId);
     }
 
-    public StudentExamView verifyAndGetView(Long examId, String inputPassword) {
+    public StudentExamView verifyAndGetView(Long examId, String inputPassword) throws Exception {
         String enrNumber = helper.getEnrNumberIdByUserId();
 
         //Fetch the specific allocation for THIS student and THIS exam

@@ -87,6 +87,7 @@ public class AuthenticationService {
         } catch (Exception e) {
             jakarta.servlet.http.Cookie cookie= cookieU.delCookie("AUTH_JWT");
             res.addCookie(cookie);
+            e.printStackTrace();
             return helper.buildResponse(HttpStatus.SERVICE_UNAVAILABLE, "error", "AI Service Error: " + e.getMessage(), false, null,null);
         }
     }

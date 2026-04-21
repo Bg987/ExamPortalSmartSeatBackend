@@ -154,7 +154,7 @@ public class ExamController {
 
     @PreAuthorize("hasRole('student')")
     @PostMapping("/sync")
-    public ResponseEntity<?> sync(@RequestBody ExamSyncDTO dto) {
+    public ResponseEntity<?> sync(@RequestBody ExamSyncDTO dto) throws Exception {
         // 1. Get enrNumber from Session/SecurityContext
         String enrNumber = helper.getEnrNumberIdByUserId();
 
@@ -166,7 +166,7 @@ public class ExamController {
     }
 
     @PostMapping("/submit")
-    public ResponseEntity<Map<String, String>> submit(@RequestBody ExamSyncDTO dto) {
+    public ResponseEntity<Map<String, String>> submit(@RequestBody ExamSyncDTO dto) throws Exception {
         String enrNumber = helper.getEnrNumberIdByUserId();
 
         try {
@@ -187,7 +187,7 @@ public class ExamController {
     //calculate grades for exam
     @PreAuthorize("hasRole('university')")
     @PostMapping("/generate/{examId}")
-    public ResponseEntity<String> generateExamResults(@PathVariable String examId) {
+    public ResponseEntity<String> generateExamResults(@PathVariable String examId) throws Exception {
         // 1. Get the master paper
         QuestionEntity exam = examRepository.findByExamId(examId)
                 .orElseThrow(() -> new RuntimeException("Exam Paper not found for ID: " + examId));
@@ -234,7 +234,7 @@ public class ExamController {
     @GetMapping("/review/{examId}")
     public ResponseEntity<ExamReviewDTO> getExamReview(
             @PathVariable String examId,
-            HttpServletRequest request) {
+            HttpServletRequest request) throws Exception {
 
         String enrNumber = helper.getEnrNumberIdByUserId();
 

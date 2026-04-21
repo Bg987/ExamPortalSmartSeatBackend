@@ -26,7 +26,7 @@ public class CollegeController {
 
     @PreAuthorize("hasRole('college')")
     @GetMapping("/getExamPassword")
-    public ResponseEntity<?> getExamPassword() {
+    public ResponseEntity<?> getExamPassword() throws Exception {
 
         Long collegeId = helper.getCollegeIdByUserId();
         List<Map<String, Object>> data = collegeService.getUpcomingExamsWithPasswords(collegeId);

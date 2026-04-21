@@ -12,7 +12,8 @@ public class CookieUtil {
 
     private JwtUtil jwt;
 
-    public jakarta.servlet.http.Cookie setCookie(Long Id,String role){
+
+    public jakarta.servlet.http.Cookie setCookie(Long Id,String role) throws Exception {
 
         return cookieSetting("AUTH_JWT",jwt.generateToken(Id,role),(24*60*60));
     }

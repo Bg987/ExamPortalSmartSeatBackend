@@ -19,7 +19,7 @@ public class StudentService {
         return seatRepo.findAllocatedExamsByStatus(EnrNumber,status);
     }
 
-    public String getEnrNumber(){
+    public String getEnrNumber() throws Exception {
         return helper.getEnrNumberIdByUserId();
     }
 

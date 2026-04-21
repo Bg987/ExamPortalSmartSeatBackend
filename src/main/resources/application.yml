@@ -4,7 +4,9 @@ server:
     tomcat:
         max-swallow-size: -1  # -1 means unlimited
         max-http-form-post-size: 20MB
-
+app:
+    security:
+        aes-seed: ${secret}
 spring:
     jpa:
         hibernate:

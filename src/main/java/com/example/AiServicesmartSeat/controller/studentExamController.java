@@ -27,7 +27,7 @@ public class studentExamController {
 
     @PreAuthorize("hasRole('student')")
     @GetMapping("/getStudentIncomplteExam")
-    public ResponseEntity<?> getStudentIncomplteExam(){
+    public ResponseEntity<?> getStudentIncomplteExam() throws Exception {
 
 
         String enrNumber = stuService.getEnrNumber();

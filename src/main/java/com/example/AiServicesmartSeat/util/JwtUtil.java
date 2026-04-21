@@ -7,8 +7,12 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Base64;
 import java.util.Date;
 
 @Component
@@ -18,19 +22,24 @@ public class JwtUtil {
     private final SecretKey key1;
     private final SecretKey key2;
 
+    private final HelperMethod helper;
+    private static final String ALGORITHM = "AES";
+
+
     // Spring injects "sec" right here, safely
     public JwtUtil(@Value("ZmFrZVNlY3JldEtleUZha2VTZWNyZXRLZXlGYWtlU2VjcmV0") String sec1,
-                   @Value("MySecretKeyForPODProjectWhichIsVeryLongAndSecure2026") String sec2) {
+                   @Value("MySecretKeyForPODProjectWhichIsVeryLongAndSecure2026") String sec2, HelperMethod helper) {
         this.key1 = Keys.hmacShaKeyFor(sec1.getBytes(StandardCharsets.UTF_8));
         this.key2 = Keys.hmacShaKeyFor(sec2.getBytes(StandardCharsets.UTF_8));
+        this.helper = helper;
     }
 
 
 
     //for smartseat backend
-    public String generateToken(Long id ,String role) {
+    public String generateToken(Long id ,String role) throws Exception {
         return Jwts.builder()
-                .claim("id",id)
+                .claim("id",helper.encrypt(id))
                 .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 10)))
@@ -51,7 +60,8 @@ public class JwtUtil {
     }
 
     public String extractId(String token) {
-        return String.valueOf(getClaims(token).get("id",Integer.class));
+
+        return String.valueOf(getClaims(token).get("id",String.class));
     }
 
     public String extractRole(String token) {
@@ -73,6 +83,8 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+
 
     public boolean validateToken(String token) {
         try {
