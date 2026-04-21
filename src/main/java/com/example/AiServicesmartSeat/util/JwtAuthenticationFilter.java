@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (path.contains("/public") ||
                 path.contains("/api/exam/getExamPasswordOpen") ||
                 path.startsWith("/api/Auth/login")||
-                path.startsWith("api/Auth/ping")) {
+                path.startsWith("/api/Auth/ping")) {
             //check SEB at the time of login
             if(path.endsWith("/api/Auth/login")){
                 if (isSebValidationFailed(request, response)) {
