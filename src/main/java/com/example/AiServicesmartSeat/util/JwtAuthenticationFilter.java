@@ -54,11 +54,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.startsWith("/api/Auth/login")||
                 path.startsWith("api/Auth/ping")) {
             //check SEB at the time of login
-//            if(path.endsWith("/api/Auth/login")){
-//                if (isSebValidationFailed(request, response)) {
-//                    return; // Stop the filter chain here
-//                }
-//            }
+            if(path.endsWith("/api/Auth/login")){
+                if (isSebValidationFailed(request, response)) {
+                    return; // Stop the filter chain here
+                }
+            }
             filterChain.doFilter(request, response);
             return;
         }
@@ -86,12 +86,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         boolean isExamPath = examPaths.stream().anyMatch(path::contains);
         String requestURI = request.getRequestURI();
 
-//        if ("student".equalsIgnoreCase(role) && isExamPath) {
-//
-//            if (isSebValidationFailed(request, response)) {
-//                return; // Stop the filter chain here
-//            }
-//        }
+        if ("student".equalsIgnoreCase(role) && isExamPath) {
+
+            if (isSebValidationFailed(request, response)) {
+                return; // Stop the filter chain here
+            }
+        }
 
         // 5. SET SECURITY CONTEXT
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
